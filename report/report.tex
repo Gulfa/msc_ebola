@@ -1,0 +1,87 @@
+
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\usepackage{listings}
+\allowdisplaybreaks
+
+\usepackage[bottom=2.54cm, top=2.54cm, left=2.54cm, right=2.54cm]{geometry}
+\title{TITLE}
+\author{
+  CANDIDATE NUMBER
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  Abstract
+
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\section{Introduction}
+\cite{funkAssessingPerformanceRealtime2018}
+
+
+\section{Background}
+
+\section{Methods}
+
+\subsection{Model}
+
+
+Neg-bin vs Poisson
+
+
+We consider a model where the daily incidence, $I_t$ follows a branching process. The branching process has a probability distribution for the number of new cases at time $t$ that where the expect number of new cases is given by the force of force of infection $\lambda_t$. The force of infection 
+
+\[ \EX(I_t) = \lambda_t =  R_t \sum^{t-1}_{s=1} I_s w_{t-s}\]
+
+The force of infection depends on the previous incidence, the serial interval $w$ and the time dependant reproduction number $R_t$. So To specify the model we need to determine the probability distribution for $I_t$, the serial interval and the reproduction number. The simplest probability distribution model is the poisson distribution where the variance is equal to the expected value. There is evidence from previous Ebola outbreaks that we would need a negative binomial distribution instead \cite{internationalebolaresponseteamExposurePatternsDriving2016,OutbreakEbolaVirus }. This distribution has two parameters, compared to only one for the poisson distribution. This allows to include overdispersion. We will use both models.
+
+We will use a serial interval fitted to data from the West Africa Ebola outbreak. Here it was found thbat the serial interval was well approximated by a gamma-distribution with  mean15.3 days and standard deviation of 9.3 days \cite{EbolaVirusDisease2014}.
+
+The final ingredient to determine the dynamics of the model is the evolution of the reproduction number with time. Depending on the functional form of $R_t$ the model can fit a large range of possible epidemic behaviours. The model could for example reproduce a standard SIR model where the serial interval is an exponential distribution and a fairly complex, but fixed evolution of the reproduction number with time.
+
+\subsection{Simulation}
+To simulate incidence trajectories from the model described above we first set the distribution of the serial interval. We then determine our model for $R_t$, which can either be deterministic or have a probability distribution.
+
+We then start the simulation with a set of initial values for daily insidence, potentially only one value.
+
+\subsection{Models for reproduction number}
+
+1. Latest estimated R_t with uncertainty
+2. Distribution of R_t values from last X days
+3. Model R_t as random walk + potential drift?
+4. Baysian auto-regressive model (local linear trend) - bsts
+
+New england journal of medicine - similar model
+
+
+
+Packages:
+
+Epiestim
+Scoring-rules
+goftest
+
+
+
+
+
+\section{Results}
+
+\section{Conclusions}
+
+\newpage
+
+\bibliography{bibliography} 
+\bibliographystyle{ieeetr}
+
+\end{document}
