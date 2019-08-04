@@ -6,6 +6,12 @@ cum_prob <- function(dist, value){
   }
   return(sum(dist <= value) / length(dist))
 }
+prob <- function(dist, value){
+  if(value == -1){
+    return(0)
+  }
+  return(sum(dist == value) / length(dist))
+}
 
 
 PIT <- function(predictions){
@@ -24,6 +30,34 @@ PIT <- function(predictions){
   }
   return(us)
 }
+
+
+discrete_log_sample <- function(values, predictions){
+
+  if(class(predictions) == "numeric"){
+    predictions <- matrix(predictions, nrow=1)
+  }
+  sc = c()
+  for(i in 1:length(values)){
+
+    log_score <- -log(prob(predictions[i, ], values[i]))
+    if(!is.finite(log_score)){
+      print(log_score)
+      print(predictions[i, ])
+      print(values[i])
+      print(values)
+      print(i)
+      stop("NA value")
+      
+
+    }
+    sc <- c(sc, log_score)
+
+  }
+  return(sc)
+
+}
+
 
 
 test_uniform <- function(data){
@@ -55,10 +89,10 @@ bias <- function(predictions){
 
 }
 
-day_ahead_prediction <- function(model, start_day=1, days_ahead=1, N=1000){
+day_ahead_prediction <- function(model, start_day=16, days_ahead=1, N=1000){
   pred <- matrix(ncol=N)
   values <- c()
-  for( i in model$days[(start_day + days_ahead): length(model$days)]){
+  for( i in model$days[(start_day + days_ahead): (length(model$days)) ]){
     p <- model$predict((i-days_ahead +1):i, N=N)
     if(class(p)[1] == "matrix"){
       p <- p[nrow(p), ]
