@@ -73,7 +73,7 @@ create_score_table_national <- function(results, day){
   }
   return(xtable(table))
 }
-
+create_score_table_national(results, day)
 
 prediction = results[["Bsts + poisson "]]$national$prediction
 inc = results[["Bsts + poisson "]]$national$model$incidence
@@ -97,7 +97,7 @@ plot_prediction <- function(inc, prediction){
 
 
 
-create_score_table_national(results, day)
+
 
 create_score_table_by_zone <- function(results, day, model){
   table <- data.frame(row.names="Health.Zone",

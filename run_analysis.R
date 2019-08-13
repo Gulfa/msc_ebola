@@ -59,7 +59,6 @@ for(model_conf in models){
     health_zone = hz_results
   )
 }
-names(results)
 
 saveRDS(results, "results/latest.RDS")
 

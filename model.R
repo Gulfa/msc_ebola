@@ -112,10 +112,12 @@ BranchingModel <- R6Class(
         new <- self$new_cases(N, FI*R, self)
         if(any(is.na(new))){
           print(day)
+          print(predict_days)
           print(new)
           print(R)
           print(FI)
-          print(self$R)
+          print(max(R))
+          print(max(R*FI))
           stop("NANs prodcued")
         }
         incidences[day,] <-new
@@ -133,8 +135,8 @@ BranchingModel <- R6Class(
 new_cases_poisson <- function(N, FI, self){
   return(rpois(N, FI))
 }
-new_cases_neg_binom <- function(N, FI, self){
-  return(rnbinom(N, mu=FI, size=0.53))
+new_cases_neg_binom <- function(N, FI, self, size=8){
+  return(rnbinom(N, mu=FI, size=size))
 }
 
 
@@ -142,7 +144,6 @@ R_latest_value <- function(days, self, N=1){
 
 
   last_day <- days[1] - 8 # The -8 row corresponds to the period that ends on the day before the first prediction day
-  print(last_day)
   mean <-  self$R["Mean(R)"][[1]][last_day]
   sd <-  self$R["Std(R)"][[1]][last_day]
   scale <- sd^2/mean
@@ -157,11 +158,16 @@ R_semilocal <- function(days, self, N=1){
 
   last_day_before <- days[1] - 1
   mean_r <-  self$R["Mean(R)"][[1]][9:last_day_before]
-  log_r <- log(mean_r)
-  ss <- AddSemilocalLinearTrend(list(), log_r)
-  model <- bsts(lr2, state.specification = ss, niter = N + 100)
+
+  b <- 15
+  
+  log_r <- log(mean_r / (b - mean_r))
+  
+  ss <- AddSemilocalLinearTrend(list(), log_r, slope.ar1.prior = NormalPrior(0, 0.1))
+  model <- bsts(log_r, state.specification = ss, niter = N + 100, ping=0)
 
   predicted <- predict(model, horizon=length(days), burn=100)$distribution
 
-  return(exp(t(predicted)))
+  return_value <- b*exp(predicted) / (1 + exp(predicted))
+  return(t(return_value))
 }

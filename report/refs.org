@@ -1,0 +1,10 @@
+
+
+Assessing the performance of real-time epidemic forecasts https://www.biorxiv.org/content/biorxiv/early/2018/11/23/177451.full.pdf
+
+
+Real-time projections of epidemic transmission and estimation of vaccination impact during an Ebola virus disease outbreak in the Eastern region of the Democratic Republic of Congo: 
+https://arxiv.org/abs/1811.01175
+
+
+Predictive Model Assessment for Count Data: https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1541-0420.2009.01191.x

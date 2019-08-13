@@ -40,7 +40,6 @@ run_model <- function(data, model, evaluation_steps){
   }
   last_day <- model$days[length(model$days)]
   predict_days <- last_day:(last_day+28)
-  print(predict_days)
   predictions <- model$predict(predict_days, N=1000)
   results <- list(model=model,
                   evaluation=evaluations,
