@@ -9,7 +9,7 @@
 \allowdisplaybreaks
 
 \usepackage[bottom=2.54cm, top=2.54cm, left=2.54cm, right=2.54cm]{geometry}
-\title{Real-time probabelistic forecasts of the Ebola outbreak in North Kivu in the Democratic Republic of Congo}
+\title{Real-time probabelistic forecasts of the 2018 -- 2019 Ebola outbreak in the Democratic Republic of Congo}
 \author{
   CANDIDATE NUMBER
 }
@@ -30,6 +30,8 @@ Word count: XXXX
 
 \tableofcontents
 
+\newpage
+
 \section{Introduction}
 
 
@@ -41,24 +43,30 @@ For forecasts to be useful in an outbreak situation, the models need to incorpor
 In this thesis, we will describe a framework for flexibly producing probabelistic forecasts and assess how well the resulting models can be used in the onogin Ebola outbreak in North Kivu. We will compare different models to choose the best model and to explore the epidemiology of the current outbreak. 
 
 \section{Background}
-\subsection{Ebola outbreak in North Kivu}
+\subsection{Ebola outbreak in North Kivu and Ituri provinces}
+On the 1st of August 2018, the minstry of health in the Democratic Republic notified the WHO about a new Ebola outbreak in the North Kivu province \cite{worldhealthorganizationEbolaOutbreakDRC2018a}. North Kivu is a populous region in north eastern DRC that borders both Rwada and Uganda. By the 27th of September the WHO assessed that the outbreak constiuted a very high national and regional risk\cite{worldhealthorganizationEbolaOutbreakDRC2018b}.
 
+Due to distrust from the local community the outbreak response has been challenging. This has lead to difficulty in tracing contracts, giving vaccinations and treating patients. There have been many episodes of violence directed towards the ebola responders which has led to fatalities and multiple stops in the response work\cite{worldhealthorganizationEbolaOutbreakDRC2018c,worldhealthorganizationEbolaOutbreakDRC2019a}.
 
-
+During the outbreak, the experimental vaccination rVSV-ZEBOV-GP has been used. Preliminary data shows positive signs that this vaccine might provide some protection from Ebola \cite{organizationPreliminaryResultsEfficacy2019}. The vaccine has been used in a ring vaccination strategy and been given to health-care workers and children. This outbreak has also seen a randomised trial for medicines to treat ebola. The trial was terminated at the 12th of August due to findings that two of the four drugs that were included showed clear effect of reducing mortaltiy from Ebola, especially with early treatment \cite{nationalinstituteofallergyandinfectiousdiseasesIndependentMonitoringBoard2019}
+At the time of writing the outbreak is still ongoing with new cases from 16 health zones and with fears that the disease will spread to larger cities in the area like Goma or accross borders. On the 17th of July the Director General of the WHO decleared the Ebola outbreak a Public Health Emergency of International Concern \cite{worldhealthorganizationEbolaOutbreakDRC2019}. 
 
 \section{Modelling of Ebola}
 
+A large number of different mathematical models have been proposed for modelling Ebola, see e.g \cite{chretienMathematicalModelingWest,viboudRAPIDDEbolaForecasting2018}. The models can be divided into categories based on the structure of the models, mechanistic, semi-mechanistic, phenomenological and hybrid models. Mechanistic models are based on a specified mechanism for disease transmission and includes standard compartmental models while phenomenological models do not include any mechanism for disease transmission. An example of a phenomenological model would be an ARIMA model for the incidence. A semi-mechanistic model include some mechanisitc asumptions, but not a full model for disease transmission.
 
+The RAPIDD Ebol Forcasting challeng in 2018 \cite{viboudRAPIDDEbolaForecasting2018} presented a range of different scenarios of an ebola outbreak that was similar to the west african outbreak and invited different groups to submitt forecasts and compared them. They found that for short-term forecasting was not related to model complexity and that ``light'' non-parametric models were able to do well. The more complex mechanistic models would on the otherhand be better suited to understand the effects of interventions. 
 
+In this thesis we will present a semi-mechanisitc model that includes some mechanisitc assumptions about serial intervals and forces of infection combined with flexible time-series methods. The aim is a flexible model with parameters that are easily interpretable. 
 
 \section{Methods}
 
 \subsection{Data}
-We will use daily incidence data from the North Kivu Ebola outbreak as reported by the Ministry of Health in Congo and distributed via the humanitarian data exchange (https://data.humdata.org/dataset/ebola-cases-and-deaths-drc-north-kivu). We will use the incidence of confimed cases at the national and at the health-zone level.
+We will use daily incidence data from the North Kivu Ebola outbreak as reported by the Ministry of Health in Congo and distributed via the humanitarian data exchange (https://data.humdata.org/dataset/ebola-cases-and-deaths-drc-north-kivu) before the 1st of September 2019. We will use the incidence of confimed cases at the national and at the health-zone level. Even with confirmed cases, there are a few days in some health zones where the incidence is negative as confrimed cases are removed. These days we set the incidence to 0. 
 
 \subsection{Model}
 
-We consider a model where the daily incidence, $I_t$ follows a branching process. Similar models have been considered in \cite{coriNewFrameworkSoftware2013,lloyd-smithSuperspreadingEffectIndividual2005} and have been used to modell Ebola during the 2014-2016 Ebola outbreak in Wester Africa \cite{EbolaVirusDisease2014, internationalebolaresponseteamExposurePatternsDriving2016}. In this class of models each infectious person gives rise to $\nu$ new infections, where $\nu$ is a random variable distributed with an offspring distribution with an expected value given by the reproduction number $R$. We use the serial interval to model the time between each generation of infections. This gives a process where the expected number of new cases at time $t$ is given by the force of force of infection $\lambda_t$. The force of infection is a producted of previous incidence weighted by the serial interval $w_\tau$ and the instaneous reproduction number $R_t$. 
+We consider a model where the daily incidence, $I_t$ follows a branching process. Similar models have been considered in \cite{coriNewFrameworkSoftware2013,lloyd-smithSuperspreadingEffectIndividual2005,nouvelletSimpleApproachMeasure2018} and have been used to model Ebola during the 2014-2016 Ebola outbreak in Wester Africa \cite{EbolaVirusDisease2014, internationalebolaresponseteamExposurePatternsDriving2016}. In this class of models each infectious person gives rise to $\nu$ new infections, where $\nu$ is a random variable distributed with an offspring distribution with an expected value given by the reproduction number $R$. We use the serial interval to model the time between each generation of infections. This gives a process where the expected number of new cases at time $t$ is given by the force of infection $\lambda_t$. The force of infection is a product of previous incidence weighted by the serial interval $w_\tau$ and the instaneous reproduction number $R_t$. 
 
 \[ E(I_t) = \lambda_t =  R_t \sum^{t-1}_{s=1} I_s w_{t-s}\]
 
@@ -78,24 +86,31 @@ with $E(X)=\frac{pr}{1-p}$ and $Var(X) = \frac{pr}{(1-p)^2}$. We will use a para
 **PLOT of Distributions?**
 
 
-The distribution for $I_t$ would be give by the sum of the offspring distributions for each infected person (weighted by the serial distribution). For both the poisson and negative binomial distribution the sum of independent distriubtions will give back the same distribution with an expected value given by the sum of the expected values. For the negative binomial distribution the dispersion parameter $k$ will remain the same. 
+The distribution for $I_t$ would be given by the sum of the offspring distributions for each infected person (weighted by the serial distribution). For both the poisson and negative binomial distribution the sum of independent distriubtions will give back the same distribution with an expected value given by the sum of the expected values. For the negative binomial distribution the dispersion parameter $k$ will remain the same. 
 
 We will investigate models with offspring distributions based both on the poisson distribution and the negative binomial distribution to assess which models fit the current outbreak better.
 
 \subsubsection{Reproduction number}
-The final ingredient to completely specify the dynamics of the model is the evolution of the reproduction number with time. Depending on the functional form of $R_t$, the model can fit a large range of possible epidemic behaviours. The model could for example reproduce in expetation a standard compartmental model where the reproduction number is given by $R(t) = R_os(t)$, where $s(t)$ is the fraction of susceptibles. In a normal SIER model with a constant rate to move between the ``E'' and the ``I'' compartment the serial interval woudl be exponential distributed.
+The final ingredient to completely specify the dynamics of the model is the evolution of the reproduction number with time. Depending on the functional form of $R_t$, the model can fit a large range of possible epidemic behaviours. %%The model could for example reproduce in expetation a standard compartmental model where the reproduction number is given by $R(t) = R_os(t)$, where $s(t)$ is the fraction of susceptibles. In a normal SIER model with a constant rate to move between the ``E'' and the ``I'' compartment the serial interval woudl be exponential distributed.
 
 It would be possible to specify a complete model for $R_t$ analytically or otherwise, but in this thesis we will instead estimate $R_t$ from the existing data and use these values to predict the future evolution of $R_t$. Since the focus of the current study is to provide a flexible framework for probabilistic prediction of disease outbreaks, this appraoch is suitable.
 
-To estimate the reproduction number from the historical incidence data we use the method developed in \cite{coriNewFrameworkSoftware2013}. If the reproduction number is estimated daily it is likely to varry too much from day to day in a manner that it is unrelastic. Therefore this method averages over the last 7 days to get more stable estimates. A baysian procedure is used to estimate both the best fit value and the uncertainty of the estimate. We use the R-package EpiEstim \cite{coriEpiEstimEpiEstimPackage2013} to estimate the reproduction number. 
+To estimate the reproduction number from the historical incidence data we use the method developed in \cite{coriNewFrameworkSoftware2013}. If the reproduction number is estimated daily it is likely to varry too much from day to day in a manner that it is unrelastic. Therefore this method averages over the last 7 days to get more stable estimates. A baysian procedure is used to estimate both the best fit value and the uncertainty of the estimate. We use the R-package EpiEstim \cite{coriEpiEstimEpiEstimPackage2013} to estimate the reproduction number using a parametric gamma distribution for the serial interval with a mean of 15.3 days and a standard devitaion of 9.3 days \cite{EbolaVirusDisease2014}
 
 Once we have calculated the historical values of $R_t$ we can use them to provide an estimate of $R_t$moving forward that can be used for predictions. We will use two different procedures to predict the reproduction number. The first method is a very simple method were we assume that reproduction number remains constant from the last historical value. We use the uncertainties given by the method in \cite{coriNewFrameworkSoftware2013} to provide estimates of the uncertainty of this estimate.
 
-The second approch to predict the reproduction number is based on baysian structural time series fitted to the historical values of $\log(R_t)$. We use model with a semi-local linear trend to allow the estimation of a trend in the recent data. We use $\log(R_t)$ instead of $R_t$ to ensure that the reproduction number remains positive. We use the R-package BSTS \cite{scottBstsBayesianStructural2019} and the standard priors. The model we use is specified as follows
+The second approch to predict the reproduction number is based on baysian structural time series fitted to the historical values of $R$. We use model with a semi-local linear trend to allow the estimation of a trend in the recent data. To ensure that predicted values of $R$ are between 0 and 15 we fit the time series on a transfomed scale:
 
-\[log(R_{t +1}) = log(R_t) + \delta_t + \epsilon_t, \epsilon_t \sim N(0, \sigma_\mu),\]
+\[ r^* = log\left(\frac{R}{15 - R}\right)\]
+
+We use the R-package BSTS \cite{scottBstsBayesianStructural2019} to fit the basysian structural time series. The model we use is specified as follows
+
+\[r^*_{t+1} = r^*_t + \delta_t + \epsilon_t, \epsilon_t \sim N(0, \sigma_\mu),\]
 \[\delta_{t+1} = D + \phi(\delta_t - D) + \eta_t, \eta_t \sim N(0, \sigma_\delta).\]
-$\delta_t$ is the semi-local trend that we model as an AR(1) process that can oscilate around a level $D$. Inverse gamma-priors are used for the standar deviation parameters $\sigma_\mu$ and $\sigma_\delta$, a gaussian prior on $D$ and a gaussian prior for $\phi$. A Markow Chain Monte Carlo (MCMC) algorithm is used to estimate the parameters in the model which then allows us to predict future values of $log(R_t)$ with uncertainties. 
+$\delta_t$ is the semi-local trend that we model as an AR(1) process that can oscilate around a level $D$. Inverse gamma-priors are used for the standar deviation parameters $\sigma_\mu$ and $\sigma_\delta$, a gaussian prior on $D$ and a $N(0, 0.1)$ prior for $\phi$. The $\phi$ parameter determines how much the trend behaves as a random-walk. For $\phi=1$ the trend follows a random walk, while for $\phi=0$ the trend is just constant with some noice. We use a prior for small values of $\phi$ to keep the model for having very rapid growth in the variance of $r*$ that would be unphysical. 
+
+A Markow Chain Monte Carlo (MCMC) algorithm is used to estimate the parameters in the model which then allows us to predict future values of $r*$ with uncertainties, we then transform back to the $R$. 
+
 
 \subsubsection{Simulating from the model}
 Once we have specified our model by specifying the offspring distribution and the method for forecasting $R_t$ we can use the model to generate probabilistic forecasts. If we want to generate a forecast for $I_{t+1}$ we first use all the data up until time $t$ to estimte $R_t$ and potentially fit the time series model to those values. Our probabelistic forecast will be based on sampling possible outcomes to generate a distribution of outcomes. We therefore first sample a value for $R_{t+1}$ from our model, then we combin this with the historical incidence data to calculate $\lambda_{t+1}$. We then sample $I_t$ from the specified offspring distribution. If we want to forecast over multiple time-steps we follow the same procedure by sampling values for the reproduction number. When calculating $\lambda_{t+2}$ we use the sampled value for $I_{t+1}$ together with the historical data ${I_s}$ for $s\leq t$. 
@@ -106,7 +121,7 @@ The aim of probabilistic forecasts is to predict both the correct average value 
 
 A model is calibrated if the uncertainties are accurate. For example if we predict that it will rain with 60\% and we find that over time it does rain 60\% of days where we predicted a 60\% chance of rain, the model would be well calibrated. Mathematically, if we assume that real disribution of outcomes in nature is given by a cumulative density function $G_t$ and our model predicts a cummulative density function $F_t$, we say that the forecast is ideal and perfectly calibrated if $F_t=G_t$. To assess calibration we will use a randomised Probability Integral Transformation (PIT) \cite{czadoPredictiveModelAssessment2009a}. We calculate
 \[ u_t = F_t(k_t) + \nu (F_t(k_t) - F_t(k_t -1)),\]
-where $k_t$ is the observed value at time, $t$ and $\nu$ is a standard uniform random variable. If the prediction is ideal, the $u_t$ will be distributed as a standard uniform distribution. We can then use the Anderson-Darling test of uniformity (goftest \cite{farawayGoftestClassicalGoodnessofFit2017}) to assess if we can reject that the models are calibrated. Important to note that uniform PIT is a nescessary, but not suffcient condition for an ideal forecast.
+where $k_t$ is the observed value at time, $t$ and $\nu$ is a standard uniform random variable. If the prediction is ideal, the $u_t$ will be distributed as a standard uniform distribution. We can then use the Anderson-Darling test of uniformity (goftest \cite{farawayGoftestClassicalGoodnessofFit2017}) to assess if we can reject that the models are calibrated. Important to note that uniform PIT is a nescessary, but not suffcient condition for an ideal forecast. In addition to assessing calibration, the PIT histogram can tell us if the forcast is under or overdispersed. If the forcast is too dispersed the PIT values are likely to cluster in the centre of the PIT histogram, while if the forcast is underdispersed they are likely to clusteralong the edges of th histogram. We use a simple measure of centrality, which is equal to the fraction of $u_t$ values that are between 0.25 and 0.75 as a way to assess if the forecasts are under or overdispersed if they are not calibrated. For both the test for uniformity and centrality we repeat the calculations 10 times and take averages to average out the effect of the randomness in the definition of $u_t$. 
 
 Sharpness is defined as the range of values in the forecast. The sharper a forecast, the more certain we are of predicted value. Sharpness depends only on the forecast and not on the observed values. We will use the normalised absolute devitation about the median of y to quantify sharpness:
 
@@ -117,15 +132,14 @@ It is also of importance to assess the bias of the forecast. Are we more likely 
 \[B_t(F_t, k_t) = 1 - (F_t(k_t) - F_t(k_t - 1)).\]
 If $B_t=0$ half the probability mass is above and half below the observed value, and the the forecast is unbiassed. $B_t$ is between -1 and 1, with both extreme values signifying a completely biased forecast.
 
-Proper scoring rules have been developed to rank forecasts. They combined calibration and sharpness and give a consistent ranking of forecasts. We will use the logarithmic and the contineously ranked probabilty score(CRPS) as implemented in the scoringRules package \cite{jordanEvaluatingProbabilisticForecasts2018}. The logarithmic scoreing rule is given by
-\[logS(F_t, k_t) = -log(F_t(k_t),\]
-and the CRPS score as
-\[CRPS(F_t,k_t) = \int_R(F_t(z) - \mathds{1}{k_t \leq z})^2 dz.\]
-To evalute both of these scores from simulated samples a kernel density estimate is used to estimate $F_t$ from the samples. 
-
+Proper scoring rules have been developed to rank forecasts. They combined calibration and sharpness and give a consistent ranking of forecasts. We will use the the contineously ranked probabilty score(CRPS) and the Dawid-Sebastiani score (DSS) as implemented in the scoringRules package \cite{jordanEvaluatingProbabilisticForecasts2018}. The CRPS score is given by 
+\[CRPS(F_t,k_t) = \int_R(F_t(z) - \mathds{1}{k_t \leq z})^2 dz,\]
+and the DSS only depens on the mean, $\mu_p$ and standard deviation, $\sigma_p$ of the predictive distribution
+\[DSS(F_t, k_t) = \left(\frac{k_t- \mu_p}{\sigma_p}\right)^2 + 2\log\sigma_p.\]
+The DSS allows an intuitive understanding of the proper scoring rules. The first term tells us about the calibration of the predictions and the second term gives information about the sharpness. For our models we will only have samples from the predictive distribution. To calculate the CRPS a kernel density estimate is used to estimate $F_t$, for the DSS we use the mean and standard deviation of the sample. 
 
 \subsection{Implementation}
-The model was implemented in the R programming langauge \cite{rcoreteamLanguageEnvironmentStatistical2018} and is available open source at http://github.com/gulfa/msc\_ebola. We will consider four differrent models to assess which model fits the data best. The models are:
+The models were implemented in the R programming langauge \cite{rcoreteamLanguageEnvironmentStatistical2018} and is available open source at http://github.com/gulfa/msc\_ebola. We will consider four differrent models to assess which model fits the data best. The models are:
 
 \begin{enumerate}
 \item{Model 1(Basic): Constant reproduction number and poisson offspring distribution}
@@ -139,6 +153,48 @@ We will assess how well the models work both for the entire epidemic and for eac
 
 
 \section{Results}
+From the start of the outbreak until XX.XX.XXXX there has been XXXX confirmed ebola cases and XXXX deaths. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed a more varied period where the reproduction number varied around 1. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\textwidth]{../output/epi_curve.png}
+  \caption{Number of new confirmed cases by week in the health zones with the most Ebola Cases}
+  \label{fig:epi_curve}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\textwidth]{../output/tot_map.png}
+
+  \caption{Total number of confirmed cases by Health Zone}
+  \label{fig:tot_map}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\textwidth]{../output/nat_rep.png}
+  \caption{Reprodcution number as a function of time, the shaded region shows the 95\% credible interval}
+  \label{fig:rep_num}
+\end{figure}
+
+
+%%The evaluations when we fitted our four models to the combined data set can be seen in Table \ref{tab:nat_evo}. 
+%%\input{../output/nat_tables}
+
+%%The averaged evaluations when we predicted the future incidence for individual health zones can be seen in Table \ref{tab:hz_evo}.
+%%\input{../output/hz_tables}
+
+
+\section{Discussion}
+
+%% Data sources <-> line list versus daily incidence
+
+%% Model selection. Pheno vs compartmental
+
+%% Improvments: Full baysian model, hierracical model that includes spread from HZ to HZ, now only including internal spread.
+
+%% Useulness
+
 
 \section{Conclusions}
 

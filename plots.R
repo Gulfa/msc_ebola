@@ -8,21 +8,45 @@ library(dplyr)
 library(ggplot2)
 library(ggrepel)
 library(xtable)
+library(ISOweek)
+
+plot_weekly_incidence <- function(data){
+  #ggplot(hz) + geom_line(aes(x=report_date, y=confirmed_cases, color=health_zone))
+
+  #ggplot(hz) + geom_column(aes(x=report_date, y=confirmed_cases, color=health_zone))
+
+  hz = data$health_zone
+  hz[, week:=ISOweek(report_date)]
+  hz[, year:=year(report_date)]
+  hz[, month:=month(report_date)]
+  hz_by_week = hz[, .(inc=sum(confirmed_cases_change)), by=.(health_zone, week, year)]
+  max_hz <- head(hz[, sum(confirmed_cases_change), by=health_zone][order(-V1)], 5)$health_zone
+  hz_by_week[!(health_zone %in% max_hz), health_zone:="Other"]
+  hz_by_week = hz_by_week[, .(inc=sum(inc)), by=.(health_zone, week, year)]
+  hz_by_week = hz_by_week[, date:=ISOweek2date(paste(week, "1", sep="-"))]
 
 
-create_map <- function(data, column, legend_title){
+  hz_by_week[inc<0, inc:=0]
+  
+  ggplot(hz_by_week) + geom_col(aes(x=date, y=inc, fill=health_zone), width=4) + xlab("Date") + ylab("New confirmed cases") + scale_fill_brewer("Health Zone", palette = "Dark2") + theme_bw()
+
+}
+
+
+
+create_map <- function(tot_data, column, legend_title){
   spdf <- geojson_read("data/geo/eastern_drc.geojson",  what = "sp")
   spdf_fortified <- tidy(spdf, region = "ADM2_NAME")
 
-  data$health_zone <- toupper(data$health_zone)  
+  tot_data$health_zone <- toupper(tot_data$health_zone)  
   spdf_fortified = spdf_fortified %>%
-    left_join(. , data, by=c("id"="health_zone"))
+    left_join(. , tot_data, by=c("id"="health_zone"))
 
   spdf_fortified$cases[is.na(spdf_fortified$cases)] <- 0
 
-
+  
   cnames <- aggregate(cbind(long, lat) ~ id,
-                      data=spdf_fortified,
+                      data=spdf_fortified[spdf_fortified$cases > 0,],
                       FUN=function(x)mean(range(x)))
   
   
@@ -38,45 +62,48 @@ create_map <- function(data, column, legend_title){
 }
 
 
+plot_r <- function(r_object, start_day){
+
+  setDT(r_object)
+  r_object[, date:=start_day + T.Start]
+  q <- ggplot(r_object) + geom_line(aes(x=date, y=get("Mean(R)"))) +
+    geom_ribbon(aes(x=date, ymin=get("Quantile.0.025(R)"), ymax=get("Quantile.0.975(R)")), alpha=0.3) +
+    theme_bw() + xlab("Date") + ylab("Reproduction Number")
+
+}
 
 
-data <- read_data("2019-07-04")
-hz <- data$health_zone
-data <- hz[, .(cases = sum(total_cases)), by=health_zone]
-q <- create_map(data, "cases", "Total Cases")
 
-
-results <- readRDS("results/latest.RDS")
-
-day <- "1"
-
-
-create_score_table_national <- function(results, day){
+create_score_table_national <- function(results){
   table <- data.frame(row.names="Model",
+                      "Days ahead"=numeric(),
                       Model=character(),
                       Callibration=numeric(),
                       Sharpness=numeric(),
                       Bias=numeric(),
-                      "log score"=numeric(),
-                      "crps score"=numeric())
+                      "Log score"=numeric(),
+                      "Crps score"=numeric())
+  
   for(model in names(results)){
     national <- results[[model]]$national$evaluation
-    row=data.frame(Model=model, 
-          Callibration=national[[day]]$pit_test_uni[["p.value"]],
-          Sharpness=mean(national[[day]]$sharpness),
-          Bias=mean(national[[day]]$bias),
-          "log score"=mean(national[[day]]$log_score),
-          "crps score"=mean(national[[day]]$crps_score)
-          )
-    print(row)
-    table <- rbind(table,row)
-  }
-  return(xtable(table))
-}
-create_score_table_national(results, day)
+    for(day in names(national)){
+      row=data.frame(Model=model,
+                     "Days ahead"=day,
+                     Callibration=national[[day]]$pit_test_uni[["p.value"]],
+                     Sharpness=mean(national[[day]]$sharpness),
+                     Bias=mean(national[[day]]$bias),
+                     "Log score"=mean(national[[day]]$log_score),
+                     "Crps score"=mean(national[[day]]$crps_score)
+                     )
+      table <- rbind(table,row)
+    }
 
-prediction = results[["Bsts + poisson "]]$national$prediction
-inc = results[["Bsts + poisson "]]$national$model$incidence
+  }
+  return(table)
+}
+
+#prediction = results[["Bsts + poisson "]]$national$prediction
+#inc = results[["Bsts + poisson "]]$national$model$incidence
 plot_prediction <- function(inc, prediction){
 
   hist_days = 1:length(inc)
@@ -99,38 +126,47 @@ plot_prediction <- function(inc, prediction){
 
 
 
-create_score_table_by_zone <- function(results, day, model){
+create_score_table_by_zone <- function(results, model){
   table <- data.frame(row.names="Health.Zone",
+                      "Days ahead" = numeric(),
                       Health.Zone=character(),
                       Callibration=numeric(),
                       Sharpness=numeric(),
                       Bias=numeric(),
-                      "log score"=numeric(),
-                      "crps score"=numeric())
+                      "Log score"=numeric(),
+                      "Crps score"=numeric())
   hz <- results[[model]]$health_zone
   for(health_zone in names(hz)){
-    d <- results[[model]]$health_zone[[health_zone]]$evaluation[[day]]
-     row=data.frame(Health.Zone=health_zone, 
-          Callibration=d$pit_test_uni[["p.value"]],
-          Sharpness=mean(d$sharpness),
-          Bias=mean(d$bias),
-          "log score"=mean(d$log_score),
-          "crps score"=mean(d$crps_score)
-          )
-    table <- rbind(table,row)
+    
+    d <- results[[model]]$health_zone[[health_zone]]$evaluation
+    for(day in names(d)){
+      if("sharpness" %in% names(d[[day]])){
+        row=data.frame(Health.Zone=health_zone,
+                       "Days ahead"=day,
+                       Callibration=d[[day]]$pit_test_uni[["p.value"]],
+                       Sharpness=mean(d[[day]]$sharpness),
+                       Bias=mean(d[[day]]$bias),
+                       "Log score"=mean(d[[day]]$log_score),
+                       "Crps score"=mean(d[[day]]$crps_score)
+                       )
+        table <- rbind(table,row)
+        }
+    }
+
   }
   return(xtable(table))
 }
 
-create_score_table_by_zone(results, day, "Basic model")
+#create_score_table_by_zone(results, day, "Basic model")
 
-create_score_table_regional <- function(results, day){
+create_score_table_regional <- function(results){
   table <- data.frame(row.names="Model",
+                      "Days ahead"=character(),
                       Model=character(),
                       Sharpness=numeric(),
                       Bias=numeric(),
-                      "log score"=numeric(),
-                      "crps score"=numeric())
+                      "Log score"=numeric(),
+                      "Crps score"=numeric())
   for(model in names(results)){
     hz <- results[[model]]$health_zone
     sharpness <- c()
@@ -138,26 +174,43 @@ create_score_table_regional <- function(results, day){
     log_score <- c()
     crps_score <- c()
 
-    for(health_zone in names(hz)){
-      sharpness <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$sharpness))
-      bias <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$bias))
-      log_score <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$log_score))
-      crps_score <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$crps_score))
-
+    for(day in names(hz[[names(hz)[1]]]$evaluation)){
+      for(health_zone in names(hz)){
+        if("sharpness" %in% names(hz[[health_zone]]$evaluation[[day]])){
+          sharpness <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$sharpness))
+          bias <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$bias))
+          log_score <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$log_score))
+          crps_score <- c(sharpness, mean(hz[[health_zone]]$evaluation[[day]]$crps_score))
+        }
+      }
+      row=data.frame(Model=model,
+                     "Days ahead" = day,
+                     Sharpness=mean(sharpness),
+                     Bias=mean(bias),
+                     "Log score"=mean(log_score),
+                     "Crps score"=mean(crps_score)
+                     )
+      table <- rbind(table,row)
     }
-    print(log_score)
-    row=data.frame(Model=model, 
-          Sharpness=mean(sharpness),
-          Bias=mean(bias),
-          "log score"=mean(log_score),
-          "crps score"=mean(crps_score)
-          )
-    table <- rbind(table,row)
   }
-  return(xtable(table))
+  return(table)
 }
 
 
-create_score_table_regional(results, day)
+
+plot_scores <- function(scores){
+
+  for(col in c("calibration", "bias", "sharpness", "centrality", "crps", "dss")){
+    ggplot(scores$overall) + geom_line(aes(x=day, y=calibration, color=model)) +
+      scale_color_brewer("Models", palette = "Dark2") + theme_bw()
+
+  }
+
+
+
+
+}
+
+#create_score_table_regional(results, day)
 
                                

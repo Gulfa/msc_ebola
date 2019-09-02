@@ -29,6 +29,7 @@ BranchingModel <- R6Class(
   "PoissonBranchingModel",
   public=list(
     days =NULL,
+    dates=NULL,
     incidence=NULL,
     serial_dist=NULL,
     Mean.SI=NULL,
@@ -38,10 +39,11 @@ BranchingModel <- R6Class(
     new_cases=NULL,
     R_func=NULL,
     desc=NULL,
-    initialize = function(days, incidence,
+    initialize = function(days, dates, incidence,
                           desc, new_cases, R_func,
                           Mean.SI=15.3, Std.SI=9.3){
       self$days <- days
+      self$dates <- dates
       self$incidence <- incidence
       self$Mean.SI <- Mean.SI
       self$Std.SI <- Std.SI
@@ -53,11 +55,14 @@ BranchingModel <- R6Class(
     },
     fit=function(){
       incidence <- self$incidence
-      x <- EstimateR(I=incidence, T.Start=1:(length(incidence)-7),
-                     T.End=8:length(incidence), Mean.SI=self$Mean.SI, Std.SI=self$Std.SI,
-                     method="ParametricSI")
+      x <- estimate_R(incidence, 
+                      config = make_config(
+                        t_start=2:(length(incidence)-7),
+                        t_end=9:length(incidence), mean_si=self$Mean.SI,
+                        std_si=self$Std.SI),
+                      method="parametric_si")
       self$R <- x$R
-      self$serial<- x$SIDistr
+      self$serial<- x$si_distr
       
     },
     predict_old=function(predict_days, N=1000){
@@ -66,7 +71,7 @@ BranchingModel <- R6Class(
         stop("First prediction day should be at least 10")
       }
 
-      serial_interval <- self$serial["w[k]"]
+      serial_interval <- self$serial
       incidences <- matrix(nrow=length(predict_days))
       for(i in 1:N){
         incidence <- self$incidence[1:first_day]
@@ -94,7 +99,7 @@ BranchingModel <- R6Class(
         stop("First prediction day should be at least 10")
       }
 
-      serial_interval <- self$serial[["w[k]"]]
+      serial_interval <- self$serial
       incidences <- matrix(nrow=first_day + length(predict_days), ncol=N)
       incidences[1:first_day, ] = self$incidence[1:first_day]
       
@@ -143,9 +148,11 @@ new_cases_neg_binom <- function(N, FI, self, size=8){
 R_latest_value <- function(days, self, N=1){
 
 
-  last_day <- days[1] - 8 # The -8 row corresponds to the period that ends on the day before the first prediction day
-  mean <-  self$R["Mean(R)"][[1]][last_day]
-  sd <-  self$R["Std(R)"][[1]][last_day]
+  last_day <- days[1]
+
+  r_values <- self$R %>% filter(t_end == last_day)
+  mean <-  r_values[["Mean(R)"]]
+  sd <-  r_values[["Std(R)"]]
   scale <- sd^2/mean
   shape <- mean^2/sd^2
   values <- rgamma(N * length(days), shape, scale=scale)
@@ -159,15 +166,35 @@ R_semilocal <- function(days, self, N=1){
   last_day_before <- days[1] - 1
   mean_r <-  self$R["Mean(R)"][[1]][9:last_day_before]
 
-  b <- 15
-  
+  b <- 10
+
+  mean_r[mean_r > b] <-  b
+
   log_r <- log(mean_r / (b - mean_r))
   
-  ss <- AddSemilocalLinearTrend(list(), log_r, slope.ar1.prior = NormalPrior(0, 0.1))
+
+
+
+
+  ss <- AddSemilocalLinearTrend(list(), log_r, slope.ar1.prior = NormalPrior(0, 0.1),
+                                level.sigma.prior = SdPrior(0.01, sample.size = 200))
   model <- bsts(log_r, state.specification = ss, niter = N + 100, ping=0)
 
   predicted <- predict(model, horizon=length(days), burn=100)$distribution
 
   return_value <- b*exp(predicted) / (1 + exp(predicted))
   return(t(return_value))
+}
+
+
+
+plot_r_pred <- function(predicted){
+  mean_R <- rowMeans(predicted)
+  quantiles <- rowQuantiles(predicted, probs=c(0.05, 0.95))
+  days <- 1:nrow(predicted)
+  q <- ggplot() +  geom_line(aes(x=days, y=mean_R)) +
+    geom_ribbon(aes(x=days, ymin=quantiles[,1],
+                    ymax=quantiles[,2]),alpha=0.3)
+
+
 }
