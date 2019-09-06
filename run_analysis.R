@@ -34,7 +34,9 @@ max_predict <- 28
 
 
 
-data <- read_data("2019-07-04")
+
+
+data <- read_data("2019-09-01")
 model_data <- prepare_data_model(data$national,
                                  data$health_zone)
 
@@ -55,33 +57,35 @@ for (model_conf in models){
                     max_predict=max_predict)
   i <- i + 1
   
-  ## for(zone in names(model_data$health_zone)){
-  ##   print(zone)
-  ##   if(length(model_data$health_zone[[zone]]$days) > 10){
+  for(zone in names(model_data$health_zone)){
+    print(zone)
+    if(length(model_data$health_zone[[zone]]$days) > 10){
       
-  ##     model <- fit_model(model_data$health_zone[[zone]], model_conf$desc,
-  ##                        model_conf$new_cases, model_conf$R_func)
+      model <- fit_model(model_data$health_zone[[zone]], model_conf$desc,
+                         model_conf$new_cases, model_conf$R_func)
 
-  ##     runs[[i]] <-list(data=model_data$health_zone[[zone]],
-  ##                      model=model,
-  ##                      model_name=model_conf$desc,
-  ##                      location=zone,
-  ##                      max_predict=max_predict)
+      runs[[i]] <-list(data=model_data$health_zone[[zone]],
+                       model=model,
+                       model_name=model_conf$desc,
+                       location=zone,
+                       max_predict=max_predict)
       
-  ##   } else{
-  ##     print(paste("Not enough days for", zone))
-  ##   }
-  ##   i <- i + 1
+    } else{
+      print(paste("Not enough days for", zone))
+    }
+    i <- i + 1
 
-  ## }
+  }
   print("end")
 }
 
+
 output <- rbindlist(parallel::mclapply(runs, run_model, mc.cores=4))
-#output <- rbindlist(lapply(runs, run_model))
+output <- rbindlist(lapply(runs, run_model))
 
 saveRDS(output, "results/latest.RDS")
 
+output <- readRDS("results/latest.RDS")
 scores <- evaluate(output)
 
 saveRDS(scores, "results/scores.RDS")

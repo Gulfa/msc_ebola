@@ -159,7 +159,7 @@ create_score_table_by_zone <- function(results, model){
 
 #create_score_table_by_zone(results, day, "Basic model")
 
-create_score_table_regional <- function(results){
+create_score_table_regional <- function(results, days){
   table <- data.frame(row.names="Model",
                       "Days ahead"=character(),
                       Model=character(),
@@ -201,14 +201,10 @@ create_score_table_regional <- function(results){
 plot_scores <- function(scores){
 
   for(col in c("calibration", "bias", "sharpness", "centrality", "crps", "dss")){
-    ggplot(scores$overall) + geom_line(aes(x=day, y=calibration, color=model)) +
-      scale_color_brewer("Models", palette = "Dark2") + theme_bw()
-
+    q <- ggplot(scores) + geom_line(aes(x=day, y=get(col), color=model)) +
+      scale_color_brewer("Models", palette = "Dark2") + theme_bw() + ylab(col) + xlab("Forecasting Horizon") 
+    ggsave(glue::glue("output/{col}.png"), width=7, heigh=3)
   }
-
-
-
-
 }
 
 #create_score_table_regional(results, day)

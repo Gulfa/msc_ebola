@@ -1,10 +1,10 @@
 
 \documentclass[12pt]{article}
 \usepackage{amsmath}
-\usepackage{subfigure}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{dsfont}
+\usepackage{subcaption}
 
 \allowdisplaybreaks
 
@@ -35,27 +35,25 @@ Word count: XXXX
 \section{Introduction}
 
 
-Real time modelling of infectious diseases can play a crucial role during disease outbreaks like the ongoing Ebola outbreak in North Kivu in the Democratic Republic of Congo (DRC). During the previous large outbreak of Ebola in Western Africa in 2014--2015, many different models were developed both during the outbreak and after\cite{chretienMathematicalModelingWest}. Models were used both to increase our understanding of the outbreak and to predict the spread of the outbreak. For example, to estimate if there would be sufficient bed capacity \cite{camachoTemporalChangesEbola2015}. To effectively use results from mathematical modelling in an outbreak it is of key imprtance that modelling outputs are integrated into the outbreak response and decision making \cite{riversUsingOutbreakScience2019a}. To acheive this requires improved communication and embedding of modelling and modellers into the outbreak response. 
+Real time modelling of infectious diseases can play a crucial role during disease outbreaks like the ongoing Ebola outbreak in the north eastern Democratic Republic of Congo (DRC). During the previous large outbreak of Ebola in Western Africa in 2014--2015, many different models were developed\cite{chretienMathematicalModelingWest} and used both to increase our understanding of the outbreak and to predict the spread of the outbreak. Estimates were used in official planning\cite{EbolaVirusDisease2014}  and for example to estimate needed bed capacity \cite{camachoTemporalChangesEbola2015}. Disease modelling has also been sucesfully implemented for for example Zika \cite{kobresSystematicReviewEvaluation2019} and influeza \cite{chretienInfluenzaForecastingHuman2014} among many other diseases. To effectively use results from mathematical modelling in an outbreak it is of key importance that modelling outputs are integrated into the outbreak response and decision making \cite{riversUsingOutbreakScience2019a}. This means that forecasts need to be availabel in real-time and be integrated into the outbreak surveillance information flow. In additionmproved communication and embedding of modelling and modellers into the outbreak response is needed. 
 
+For forecasts to be useful in an outbreak situation, the models need to incorporate uncertainty into the predictions\cite{funkAssessingPerformanceRealtime2019, weiCalibrationTestsCount2014,gneitingEditorialProbabilisticForecasting2008}. Without understanding the range of possible outcomes from a model and their associated probabilities it is very difficult to support effective public health action in outbreak situations. Evaluting such probabelstic forecasts requires us to not just assess the accuracy of point predictions, but to assess if the model correctly assess it's own uncertainty. A model that that sucesfully asseses it's own uncertainty is calibrated. We should strive to create well calibrated models that can be updated in real-time and that that are interpretable and can be used in the outbreak response. 
 
-For forecasts to be useful in an outbreak situation, the models need to incorporate uncertainty into the predictions. Without understanding the range of possible outcomes from a model and their associated probabilities it is very difficult to support effective public health action in outbreak situations. Evaluting such probabelstic forecasts requires us to not just assess the accuracy of the point predictions, but to assess if the model correctly assess it's own uncertainty. If a model can do that, we say that it is calibrated. We are also interested in the sharpness and bias of the models, to assess their performance. These measure tell us about the absolute performance of the model, but to accurately compare models it is often better to use proper scoring rules.
+In this thesis, we will describe a framework for flexibly producing probabelistic forecasts and assess how well the resulting models can be used in the onogin Ebola outbreak in north-eastern DRC. We will compare different models to choose the best model and to explore the epidemiology of the current outbreak. 
 
-In this thesis, we will describe a framework for flexibly producing probabelistic forecasts and assess how well the resulting models can be used in the onogin Ebola outbreak in North Kivu. We will compare different models to choose the best model and to explore the epidemiology of the current outbreak. 
-
-\section{Background}
 \subsection{Ebola outbreak in North Kivu and Ituri provinces}
-On the 1st of August 2018, the minstry of health in the Democratic Republic notified the WHO about a new Ebola outbreak in the North Kivu province \cite{worldhealthorganizationEbolaOutbreakDRC2018a}. North Kivu is a populous region in north eastern DRC that borders both Rwada and Uganda. By the 27th of September the WHO assessed that the outbreak constiuted a very high national and regional risk\cite{worldhealthorganizationEbolaOutbreakDRC2018b}.
+On the 1st of August 2018, the minstry of health in the Democratic Republic notified the WHO about a new Ebola outbreak in the North Kivu province \cite{worldhealthorganizationEbolaOutbreakDRC2018a}. North Kivu is a populous region in north eastern DRC that borders both Rwada and Uganda. By the 27th of September the outbreak had continued spreading and the WHO assessed that the outbreak constiuted a very high national and regional risk\cite{worldhealthorganizationEbolaOutbreakDRC2018b}.
 
 Due to distrust from the local community the outbreak response has been challenging. This has lead to difficulty in tracing contracts, giving vaccinations and treating patients. There have been many episodes of violence directed towards the ebola responders which has led to fatalities and multiple stops in the response work\cite{worldhealthorganizationEbolaOutbreakDRC2018c,worldhealthorganizationEbolaOutbreakDRC2019a}.
 
-During the outbreak, the experimental vaccination rVSV-ZEBOV-GP has been used. Preliminary data shows positive signs that this vaccine might provide some protection from Ebola \cite{organizationPreliminaryResultsEfficacy2019}. The vaccine has been used in a ring vaccination strategy and been given to health-care workers and children. This outbreak has also seen a randomised trial for medicines to treat ebola. The trial was terminated at the 12th of August due to findings that two of the four drugs that were included showed clear effect of reducing mortaltiy from Ebola, especially with early treatment \cite{nationalinstituteofallergyandinfectiousdiseasesIndependentMonitoringBoard2019}
+During the outbreak, the experimental vaccination rVSV-ZEBOV-GP has been used in a ring vaccination strategy. The vaccine was given under the compasionate use regime and have been evaluated during the outbreak. Preliminary data shows positive signs that this vaccine might provide some protection from Ebola \cite{organizationPreliminaryResultsEfficacy2019}.  been given to health-care workers and children. This outbreak has also seen a randomised trial for medicines to treat ebola. The trial was terminated at the 12th of August due to findings that two of the four drugs that were included showed clear effect of reducing mortaltiy from Ebola, especially with early treatment \cite{nationalinstituteofallergyandinfectiousdiseasesIndependentMonitoringBoard2019}
 At the time of writing the outbreak is still ongoing with new cases from 16 health zones and with fears that the disease will spread to larger cities in the area like Goma or accross borders. On the 17th of July the Director General of the WHO decleared the Ebola outbreak a Public Health Emergency of International Concern \cite{worldhealthorganizationEbolaOutbreakDRC2019}. 
 
 \section{Modelling of Ebola}
 
 A large number of different mathematical models have been proposed for modelling Ebola, see e.g \cite{chretienMathematicalModelingWest,viboudRAPIDDEbolaForecasting2018}. The models can be divided into categories based on the structure of the models, mechanistic, semi-mechanistic, phenomenological and hybrid models. Mechanistic models are based on a specified mechanism for disease transmission and includes standard compartmental models while phenomenological models do not include any mechanism for disease transmission. An example of a phenomenological model would be an ARIMA model for the incidence. A semi-mechanistic model include some mechanisitc asumptions, but not a full model for disease transmission.
 
-The RAPIDD Ebol Forcasting challeng in 2018 \cite{viboudRAPIDDEbolaForecasting2018} presented a range of different scenarios of an ebola outbreak that was similar to the west african outbreak and invited different groups to submitt forecasts and compared them. They found that for short-term forecasting was not related to model complexity and that ``light'' non-parametric models were able to do well. The more complex mechanistic models would on the otherhand be better suited to understand the effects of interventions. 
+The RAPID Ebola Forcasting challeng in 2018 \cite{viboudRAPIDDEbolaForecasting2018} presented a range of different scenarios of an ebola outbreak that was similar to the west african outbreak and invited different groups to submitt forecasts and compared them. They found that for short-term forecasting was not related to model complexity and that ``light'' non-parametric models were able to do well. The more complex mechanistic models would on the otherhand be better suited to understand the effects of interventions. 
 
 In this thesis we will present a semi-mechanisitc model that includes some mechanisitc assumptions about serial intervals and forces of infection combined with flexible time-series methods. The aim is a flexible model with parameters that are easily interpretable. 
 
@@ -81,9 +79,16 @@ For a number of diseases it has been shown that offspring distribution has large
 
 \[P(X=k) = {k + r - 1 \choose k} (1-p)^rp^k, \]
 
-with $E(X)=\frac{pr}{1-p}$ and $Var(X) = \frac{pr}{(1-p)^2}$. We will use a parameterisation of the negative binomial distribution where we use the mean, $\mu$ and the dispersion parameter $k$. In this formulation the variance is given by $\mu(1 + \frac{1}{k})$. For $k->\infty$ we would get a poisson ditribution. The smaller $k$ is the more the outbreak is dominated by a few super-spreaders and the larger $k$ is the more similar the impact of each infected person is. For SARS it has been found that $k=0.16$\cite{lloyd-smithSuperspreadingEffectIndividual2005}. For the Ebola outbreak in West Africa they found $k=0.53$ using conservative assumptions and data from the network of infections \cite{internationalebolaresponseteamExposurePatternsDriving2016}.
+with $E(X)=\frac{pr}{1-p}$ and $Var(X) = \frac{pr}{(1-p)^2}$. We will use a parameterisation of the negative binomial distribution where we use the mean, $\mu$ and the dispersion parameter $k$. In this formulation the variance is given by $\mu(1 + \frac{1}{k})$. For $k->\infty$ we would get a poisson ditribution. The smaller $k$ is the more the outbreak is dominated by a few super-spreaders and the larger $k$ is the more similar the impact of each infected person is. For SARS it has been found that $k=0.16$\cite{lloyd-smithSuperspreadingEffectIndividual2005}. For the Ebola outbreak in West Africa they found $k=0.53$ using conservative assumptions and data from the network of infections \cite{internationalebolaresponseteamExposurePatternsDriving2016}. The different offspring distributions ca be seen in Figure \ref{fig:offspring}
 
-**PLOT of Distributions?**
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\textwidth]{../output/prob_dist.png}
+  \caption{Poisson and negative binomial offspring distirubtions with a mean of 10.}
+  \label{fig:offspring}
+\end{figure}
+
+
 
 
 The distribution for $I_t$ would be given by the sum of the offspring distributions for each infected person (weighted by the serial distribution). For both the poisson and negative binomial distribution the sum of independent distriubtions will give back the same distribution with an expected value given by the sum of the expected values. For the negative binomial distribution the dispersion parameter $k$ will remain the same. 
@@ -148,12 +153,14 @@ The models were implemented in the R programming langauge \cite{rcoreteamLanguag
 \item{Model 4(Full): Varrying reproduction number and negative binomial offspring distribution}
 \end{enumerate}
 
+For the dispersion parameter $k$ for the negative binomial models we fit a value for the simple negativebinomial model by minimising the continous ranked probability score for the one day ahead predictions for the model on the level of the whole outbreak. 
+
 We will assess how well the models work both for the entire epidemic and for each health zone. To evalute a model we will estimate the calibration, sharpness, bias, log score and CRPS for forecasts of 1, 7, 14, 21 and 28 days ahead. To do this we start { \bf check } 16 days after the start of the epidemic in the location and calculate the $d$ ahead prediction for all historically available data. For the calibration we use all the values to assess if they are normally distributed, while for all the other metrics we average them over all the time steps. 16 days was chosen as the start as this is when the method for calculatng $R_t$ can give somehat reliable values \cite{coriNewFrameworkSoftware2013}. 
 
 
 
 \section{Results}
-From the start of the outbreak until XX.XX.XXXX there has been XXXX confirmed ebola cases and XXXX deaths. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed a more varied period where the reproduction number varied around 1. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. 
+From the start of the outbreak until the 31st of August 2019 there has been 2,926 confirmed ebola cases and 1926 confirmed ebola deaths. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed a more varied period where the reproduction number varied around 1. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. From the epi-curve there seems to a connection between the peaks and the large increases in specific health zones. So that pattern is in part driven by introduction or reintroduciton to individual health zones. 
 
 \begin{figure}[h]
   \centering
@@ -177,9 +184,43 @@ From the start of the outbreak until XX.XX.XXXX there has been XXXX confirmed eb
   \label{fig:rep_num}
 \end{figure}
 
+We first found that the dispersion parameter that gives the smallest CRPS score for one day ahead predictions for the negative binomial models was k=8. Morevariance than a poisson distribution, but much less than found in previous Ebola outbreaks as discussed above. 
 
-%%The evaluations when we fitted our four models to the combined data set can be seen in Table \ref{tab:nat_evo}. 
-%%\input{../output/nat_tables}
+On the level of the whole outbreak, the score for our four models for different forecasting horizons can be seen in Table \ref{tab:nat_evo}.The evolution of the score can also be seen in Figure \ref{fig:nat_scores}
+\input{../output/nat_tables}
+
+
+\begin{figure}[h]
+\begin{subfigure}{\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=0.7\linewidth]{../output/crps.png}  
+  \caption{Contineously Ranked Probability Score}
+  \label{fig:sub-first}
+\end{subfigure}
+
+\begin{subfigure}{\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=0.7\linewidth]{../output/calibration.png}  
+  \caption{Calibration p-value}
+  \label{fig:sub-second}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=0.7\linewidth]{../output/bias.png}  
+  \caption{Bias}
+  \label{fig:sub-third}
+\end{subfigure}
+  \caption{Scores for the entire outbreak as a function of the forecasting horizon.}
+
+  \label{fig:nat_scores}
+\end{figure}
+
+Together they show that for next day forecast, the negative binomial offspring distirbution is needed for a calibrated forecast. The negative binomial distribution is clearly needed for a calibrated forecast even for one day ahead predictions. For longer forecasting horizons the poisson distribution with the semilocal time series prediction for $R_t$ is the best model and is calibrated out to about 12 days. From the centrality scores, we can see that both the models with time series are overestimating the dispersion and the negative binomial model more so than the poisson model. Based on the scoring rules the two time series models are signficantly better than the models without any evaluation in $R_t$.
+
+We provide a forecast for this model for the next 28 days in Figure XX and based on the current evaluation of 
 
 %%The averaged evaluations when we predicted the future incidence for individual health zones can be seen in Table \ref{tab:hz_evo}.
 %%\input{../output/hz_tables}

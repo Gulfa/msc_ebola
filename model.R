@@ -166,18 +166,14 @@ R_semilocal <- function(days, self, N=1){
   last_day_before <- days[1] - 1
   mean_r <-  self$R["Mean(R)"][[1]][9:last_day_before]
 
-  b <- 10
+  b <- 15
 
-  mean_r[mean_r > b] <-  b
+  mean_r[mean_r >= b] <-  b - 0.1
 
   log_r <- log(mean_r / (b - mean_r))
   
-
-
-
-
-  ss <- AddSemilocalLinearTrend(list(), log_r, slope.ar1.prior = NormalPrior(0, 0.1),
-                                level.sigma.prior = SdPrior(0.01, sample.size = 200))
+  ss <- AddSemilocalLinearTrend(list(), log_r, slope.ar1.prior = NormalPrior(0, 0.1))
+#                                level.sigma.prior = SdPrior(0.01, sample.size = 200))
   model <- bsts(log_r, state.specification = ss, niter = N + 100, ping=0)
 
   predicted <- predict(model, horizon=length(days), burn=100)$distribution

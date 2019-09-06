@@ -33,7 +33,6 @@ PIT <- function(data, N=10){
       u <- P_x_m_1 + runif(1, 0,1) * (P_x - P_x_m_1)
       us[i] <- u
     }
-    hist(us)
     p_values <- c(p_values, ad.test(us)$p.value)
     centrality <- sum( us >= 0.25 & us < 0.75) / length(us)
     centralities <- c(centralities, centrality)
@@ -62,34 +61,28 @@ daily_score <- function(data){
 
 }
 
+
+
+
 evaluate <- function(data){
 
-  ## by_start_day <- data %>% filter(!is.na(value)) %>%
-  ##   gather( key="variable", value="predictions", paste("V", 1:1000, sep="")) %>%
-  ##   group_by(start_day, day, model, location) %>%
-  ##   summarize(value = first(value),
-  ##             sharpness=sharpness_madn(predictions),
-  ##             bias=bias(value, predictions),
-  ##             crps=crps_sample(value, predictions),
-  ##             dss=dss_sample(value, predictions))
+  evaluate_PIT_day <- function(x_day){
+    return(data %>% filter(!is.na(value), day==x_day) %>%
+      group_by(model, day, location) %>% 
+      do( bow(., tie(centrality, calibration) := PIT(.))))
+    
 
-  ## cluster <- new_cluster(4)
-  ## cluster_library(cluster, "tie")
-  ## cluster_library(cluster, "scoringRules")
-  ## cluster_library(cluster, "dplyr")
-  ## cluster_library(cluster, "goftest")
-  ## cluster_assign(cluster, daily_score=daily_score)
-  ## cluster_assign(cluster, sharpness_madn=sharpness_madn)
-  ## cluster_assign(cluster, bias=bias)
-  ## cluster_assign(cluster, PIT=PIT)
-  PIT_results <- data %>% filter(!is.na(value)) %>%
-    group_by(model, day, location) %>% #partition(cluster) %>%
-    do( bow(., tie(centrality, calibration) := PIT(.))) #%>% collect()
-
-  by_start_day <- data %>% filter(!is.na(value)) %>%
-     group_by(start_day, day, model, location) %>% #partition(cluster) %>%
-    do( bow(., tie(value,sharpness,bias,crps,dss):=daily_score(.)))# %>% collect()
+  }
   
+  PIT_results <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=4))
+
+  evaluate_scores_day <- function(x_day){
+    return(data %>% filter(!is.na(value) & day==x_day) %>%
+     group_by(start_day, day, model, location) %>% 
+    do( bow(., tie(value,sharpness,bias,crps,dss):=daily_score(.))))
+  }
+    
+  by_start_day <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_scores_day, mc.cores=4))
   total <- by_start_day %>% group_by(model, location, day) %>%
     summarize(sharpness=mean(sharpness),
               bias=mean(bias),
