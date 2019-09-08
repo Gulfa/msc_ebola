@@ -81,7 +81,16 @@ for (model_conf in models){
 
 
 output <- rbindlist(parallel::mclapply(runs, run_model, mc.cores=4))
-output <- rbindlist(lapply(runs, run_model))
+
+
+combined_national <- output %>%
+  filter(location != "national") %>% group_by(model, dates, day, start_day) %>%
+  summarize_at(starts_with("V"), sum) %>% ungroup() %>%
+  mutate(location = "national_combined") %>%
+  inner_join(output %>% filter(location == "national") %>% select(model, dates, day, value),
+             by=c("model"="model", "dates"="dates","day"="day")) 
+
+output <- rbind(output, combined_national)
 
 saveRDS(output, "results/latest.RDS")
 

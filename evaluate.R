@@ -14,7 +14,7 @@ prob <- function(dist, value){
 PIT <- function(data, N=10){
   p_values <- c()
   centralities <- c()
-  predictions <- as.matrix(data[paste("V", 1:1000, sep="")])
+  predictions <- as.matrix(data %>% select(starts_with("V")))
   values <- data %>% pull(value)
   for( j in 1:N){
     us <- as.numeric(length(values))
@@ -34,7 +34,7 @@ PIT <- function(data, N=10){
       us[i] <- u
     }
     p_values <- c(p_values, ad.test(us)$p.value)
-    centrality <- sum( us >= 0.25 & us < 0.75) / length(us)
+    centrality <- sum( us >= 0.25 & us < 0.75) / length(us) - 0.5
     centralities <- c(centralities, centrality)
 
   }
@@ -46,7 +46,7 @@ PIT <- function(data, N=10){
 
 
 daily_score <- function(data){
-  predictions <- as.matrix(data[paste("V", 1:1000, sep="")])
+  predictions <- as.matrix(as.matrix(data %>% select(starts_with("V"))))
   values <- data %>% pull(value)
 
   return( c(values,
@@ -64,7 +64,7 @@ daily_score <- function(data){
 
 
 
-evaluate <- function(data){
+evaluate <- function(data, cores=1){
 
   evaluate_PIT_day <- function(x_day){
     return(data %>% filter(!is.na(value), day==x_day) %>%
@@ -74,7 +74,7 @@ evaluate <- function(data){
 
   }
   
-  PIT_results <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=4))
+  PIT_results <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=cores))
 
   evaluate_scores_day <- function(x_day){
     return(data %>% filter(!is.na(value) & day==x_day) %>%
@@ -82,7 +82,7 @@ evaluate <- function(data){
     do( bow(., tie(value,sharpness,bias,crps,dss):=daily_score(.))))
   }
     
-  by_start_day <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_scores_day, mc.cores=4))
+  by_start_day <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_scores_day, mc.cores=cores))
   total <- by_start_day %>% group_by(model, location, day) %>%
     summarize(sharpness=mean(sharpness),
               bias=mean(bias),

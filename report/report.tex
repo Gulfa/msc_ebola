@@ -60,7 +60,7 @@ In this thesis we will present a semi-mechanisitc model that includes some mecha
 \section{Methods}
 
 \subsection{Data}
-We will use daily incidence data from the North Kivu Ebola outbreak as reported by the Ministry of Health in Congo and distributed via the humanitarian data exchange (https://data.humdata.org/dataset/ebola-cases-and-deaths-drc-north-kivu) before the 1st of September 2019. We will use the incidence of confimed cases at the national and at the health-zone level. Even with confirmed cases, there are a few days in some health zones where the incidence is negative as confrimed cases are removed. These days we set the incidence to 0. 
+We will use daily incidence data from the North Kivu Ebola outbreak as reported by the Ministry of Health in Congo and distributed via the humanitarian data exchange (https://data.humdata.org/dataset/ebola-cases-and-deaths-drc-north-kivu) before the 1st of September 2019. We will use the incidence of confimed cases at the national and at the health-zone level. We use confirmed cases so that estimates of the reproduction number and other epidemiological parameters correspond only to Ebola and not Ebola and Ebola-like illnesess. Due to the nature of the outbreak and the nature of the data some confirmed cases are later found to not be Ebola. This can lead to days with negative incidence, we have chosen to set any negative incidence to zero. Data are missing for some days, for these days we lineraly interpolate the incidence. 
 
 \subsection{Model}
 
@@ -114,6 +114,8 @@ We use the R-package BSTS \cite{scottBstsBayesianStructural2019} to fit the basy
 \[\delta_{t+1} = D + \phi(\delta_t - D) + \eta_t, \eta_t \sim N(0, \sigma_\delta).\]
 $\delta_t$ is the semi-local trend that we model as an AR(1) process that can oscilate around a level $D$. Inverse gamma-priors are used for the standar deviation parameters $\sigma_\mu$ and $\sigma_\delta$, a gaussian prior on $D$ and a $N(0, 0.1)$ prior for $\phi$. The $\phi$ parameter determines how much the trend behaves as a random-walk. For $\phi=1$ the trend follows a random walk, while for $\phi=0$ the trend is just constant with some noice. We use a prior for small values of $\phi$ to keep the model for having very rapid growth in the variance of $r*$ that would be unphysical. 
 
+**Example of evolution**
+
 A Markow Chain Monte Carlo (MCMC) algorithm is used to estimate the parameters in the model which then allows us to predict future values of $r*$ with uncertainties, we then transform back to the $R$. 
 
 
@@ -126,7 +128,12 @@ The aim of probabilistic forecasts is to predict both the correct average value 
 
 A model is calibrated if the uncertainties are accurate. For example if we predict that it will rain with 60\% and we find that over time it does rain 60\% of days where we predicted a 60\% chance of rain, the model would be well calibrated. Mathematically, if we assume that real disribution of outcomes in nature is given by a cumulative density function $G_t$ and our model predicts a cummulative density function $F_t$, we say that the forecast is ideal and perfectly calibrated if $F_t=G_t$. To assess calibration we will use a randomised Probability Integral Transformation (PIT) \cite{czadoPredictiveModelAssessment2009a}. We calculate
 \[ u_t = F_t(k_t) + \nu (F_t(k_t) - F_t(k_t -1)),\]
-where $k_t$ is the observed value at time, $t$ and $\nu$ is a standard uniform random variable. If the prediction is ideal, the $u_t$ will be distributed as a standard uniform distribution. We can then use the Anderson-Darling test of uniformity (goftest \cite{farawayGoftestClassicalGoodnessofFit2017}) to assess if we can reject that the models are calibrated. Important to note that uniform PIT is a nescessary, but not suffcient condition for an ideal forecast. In addition to assessing calibration, the PIT histogram can tell us if the forcast is under or overdispersed. If the forcast is too dispersed the PIT values are likely to cluster in the centre of the PIT histogram, while if the forcast is underdispersed they are likely to clusteralong the edges of th histogram. We use a simple measure of centrality, which is equal to the fraction of $u_t$ values that are between 0.25 and 0.75 as a way to assess if the forecasts are under or overdispersed if they are not calibrated. For both the test for uniformity and centrality we repeat the calculations 10 times and take averages to average out the effect of the randomness in the definition of $u_t$. 
+where $k_t$ is the observed value at time, $t$ and $\nu$ is a standard uniform random variable. If the prediction is ideal, the $u_t$ will be distributed as a standard uniform distribution. We can then use the Anderson-Darling test of uniformity (goftest \cite{farawayGoftestClassicalGoodnessofFit2017}) to assess if we can reject that the models are calibrated. Important to note that uniform PIT is a nescessary, but not suffcient condition for an ideal forecast. In addition to assessing calibration, the PIT histogram can tell us if the forcast is under or overdispersed. If the forcast is too dispersed the PIT values are likely to cluster in the centre of the PIT histogram, while if the forcast is underdispersed they are likely to clusteralong the edges of th histogram. We use a simple measure of centrality, which is equal to the fraction of $u_t$ values that are between 0.25 and 0.75 as a way to assess if the forecasts are under or overdispersed if they are not calibrated.
+\[\text{centrality} = \frac{N(0.25 < u_t < 0.75}{N} - 0.5\]
+When the centrality scores is less than 0, most of the PIT values or outside of central region suggesting that the forecasts are underestimating the real uncertainty.  If the centrality score is larger than 0 then the PIT scores are mainly in the central region and this indicates that the forecasts are overestimating the amount of uncertainty. 
+
+
+For both the test for uniformity and centrality we repeat the calculations 10 times and take averages to average out the effect of the randomness in the definition of $u_t$. 
 
 Sharpness is defined as the range of values in the forecast. The sharper a forecast, the more certain we are of predicted value. Sharpness depends only on the forecast and not on the observed values. We will use the normalised absolute devitation about the median of y to quantify sharpness:
 
@@ -194,7 +201,7 @@ On the level of the whole outbreak, the score for our four models for different 
 \begin{subfigure}{\textwidth}
   \centering
   % include first image
-  \includegraphics[width=0.7\linewidth]{../output/crps.png}  
+  \includegraphics[width=0.7\linewidth]{../output/national_crps.png}  
   \caption{Contineously Ranked Probability Score}
   \label{fig:sub-first}
 \end{subfigure}
@@ -202,14 +209,14 @@ On the level of the whole outbreak, the score for our four models for different 
 \begin{subfigure}{\textwidth}
   \centering
   % include second image
-  \includegraphics[width=0.7\linewidth]{../output/calibration.png}  
+  \includegraphics[width=0.7\linewidth]{../output/national_calibration.png}  
   \caption{Calibration p-value}
   \label{fig:sub-second}
 \end{subfigure}
 \begin{subfigure}{\textwidth}
   \centering
   % include second image
-  \includegraphics[width=0.7\linewidth]{../output/bias.png}  
+  \includegraphics[width=0.7\linewidth]{../output/national_bias.png}  
   \caption{Bias}
   \label{fig:sub-third}
 \end{subfigure}
@@ -222,13 +229,25 @@ Together they show that for next day forecast, the negative binomial offspring d
 
 We provide a forecast for this model for the next 28 days in Figure XX and based on the current evaluation of 
 
-%%The averaged evaluations when we predicted the future incidence for individual health zones can be seen in Table \ref{tab:hz_evo}.
-%%\input{../output/hz_tables}
+The averaged evaluations when we predicted the future incidence for individual health zones can be seen in Table \ref{tab:hz_evo}.
+\input{../output/hz_tables}
+
+Evaluations for each health zone for the Poisson Semilocal model in Table \ref{tab:by_hz_evo}.
+\input{../output/by_hz_tables}
 
 
 \section{Discussion}
 
-%% Data sources <-> line list versus daily incidence
+
+\subsection{Limitations}
+The data source for the model is the cummulative number of cases by days. We calculate the incidence as the difference in cummulative cases. This data source has many disadvantages to for example having a line list of all cases. A line list would give a much better idea of the data of onset of disease, it would remove the problem with negative incidence rates after corrections and any problems with having to interpolate incidence rates.
+
+It is a strength of the modelling approach that it can be used on less than ideal data to still give reasonable short-term forecasts. In outbreak situations having up-to-date linelists of cases can be difficult or impossible, but we would still like to give reasonable forecasts. 
+
+The model in it's current form has several limitations. The main limitation on the Health Zone level is that spread between health zones is not modelled. The model structure is flexible enough to easily allow the incroporation of an addition force of infection term that gives the force of infection from outside the health zone. There are multiple options for how to model the geographic dependence that woul all easily fit into our model structure, this includes spread from adjacent health zones, using a gravity model where the amount of spread between health zones is based on the populations or if available data on inter health-zone travel could be used. Without this spread term the model can not be used to forecast probabilities for the spread of Ebola to new health zonez. In addition the current way of estimating the time-varrying reproduction number requires at least 12 days of data, so we need at least 12 days of data in a health zone to be able to forecast.
+
+
+
 
 %% Model selection. Pheno vs compartmental
 

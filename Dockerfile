@@ -1,6 +1,6 @@
-FROM rocker/tidyverse
+FROM rocker/geospatial
 
-RUN apt-get install -y libgsl-dev
+RUN apt-get install -y libgsl-dev jq libjq-dev libudunits2-dev libprotobuf-dev  libv8-dev
 
 RUN install2.r --error \
     --deps TRUE \
@@ -16,11 +16,14 @@ RUN install2.r --error \
     goftest \
     xtable 
 
-RUN R 
+RUN install2.r --error \
+    --deps TRUE \
+    geojsonio \
+    ggrepel \
+    ISOweek
 
 RUN Rscript -e 'devtools::install_github("dirkschumacher/rhxl")'
-RUN R 
 
 RUN Rscript -e 'devtools::install_github("romainfrancois/tie")'
 
-RUN apt-get install libxt-dev
+RUN apt-get -y install libxt-dev
