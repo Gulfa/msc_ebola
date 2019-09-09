@@ -80,23 +80,24 @@ for (model_conf in models){
 }
 
 
-output <- rbindlist(parallel::mclapply(runs, run_model, mc.cores=4))
+#output <- rbindlist(parallel::mclapply(runs, run_model, mc.cores=4))
 
-saveRDS(output, "results/latest.RDS")
+#saveRDS(output, "results/latest.RDS")
 
 #output <- readRDS("results/latest.RDS")
 
-combined_national <- output %>%
-  filter(location != "national") %>% group_by(model, dates, day, start_day) %>%
-  summarize_at(vars(starts_with("V", ignore.case=FALSE)), sum) %>% ungroup() %>%
-  mutate(location = "national_combined") %>%
-  inner_join(output %>% filter(location == "national") %>% dplyr::select(model, dates, day, value),
-             by=c("model"="model", "dates"="dates","day"="day")) 
+## combined_national <- output %>%
+##   filter(location != "national") %>% group_by(model, dates, day, start_day) %>%
+##   summarize_at(vars(starts_with("V", ignore.case=FALSE)), sum) %>% ungroup() %>%
+##   mutate(location = "national_combined") %>%
+##   inner_join(output %>% filter(location == "national") %>% dplyr::select(model, dates, day, value),
+##              by=c("model"="model", "dates"="dates","day"="day")) 
 
-output <- rbind(output, combined_national, fill=TRUE)
+## output <- rbind(output, combined_national, fill=TRUE)
 
-saveRDS(output, "results/latest.RDS")
+## saveRDS(output, "results/latest.RDS")
 
+output <- readRDS("results/latest.RDS")
 scores <- evaluate(output, cores=4)
 
 saveRDS(scores, "results/scores.RDS")

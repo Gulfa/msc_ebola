@@ -49,7 +49,7 @@ Due to distrust from the local community the outbreak response has been challeng
 During the outbreak, the experimental vaccination rVSV-ZEBOV-GP has been used in a ring vaccination strategy. The vaccine was given under the compasionate use regime and have been evaluated during the outbreak. Preliminary data shows positive signs that this vaccine might provide some protection from Ebola \cite{organizationPreliminaryResultsEfficacy2019}.  been given to health-care workers and children. This outbreak has also seen a randomised trial for medicines to treat ebola. The trial was terminated at the 12th of August due to findings that two of the four drugs that were included showed clear effect of reducing mortaltiy from Ebola, especially with early treatment \cite{nationalinstituteofallergyandinfectiousdiseasesIndependentMonitoringBoard2019}
 At the time of writing the outbreak is still ongoing with new cases from 16 health zones and with fears that the disease will spread to larger cities in the area like Goma or accross borders. On the 17th of July the Director General of the WHO decleared the Ebola outbreak a Public Health Emergency of International Concern \cite{worldhealthorganizationEbolaOutbreakDRC2019}. 
 
-\section{Modelling of Ebola}
+\subsection{Modelling of Ebola}
 
 A large number of different mathematical models have been proposed for modelling Ebola, see e.g \cite{chretienMathematicalModelingWest,viboudRAPIDDEbolaForecasting2018}. The models can be divided into categories based on the structure of the models, mechanistic, semi-mechanistic, phenomenological and hybrid models. Mechanistic models are based on a specified mechanism for disease transmission and includes standard compartmental models while phenomenological models do not include any mechanism for disease transmission. An example of a phenomenological model would be an ARIMA model for the incidence. A semi-mechanistic model include some mechanisitc asumptions, but not a full model for disease transmission.
 
@@ -245,13 +245,21 @@ It is a strength of the modelling approach that it can be used on less than idea
 The model in it's current form has several limitations. The main limitation on the Health Zone level is that spread between health zones is not modelled. The model structure is flexible enough to easily allow the incroporation of an addition force of infection term that gives the force of infection from outside the health zone. There are multiple options for how to model the geographic dependence that woul all easily fit into our model structure, this includes spread from adjacent health zones, using a gravity model where the amount of spread between health zones is based on the populations or if available data on inter health-zone travel could be used. Without this spread term the model can not be used to forecast probabilities for the spread of Ebola to new health zonez. In addition the current way of estimating the time-varrying reproduction number requires at least 12 days of data, so we need at least 12 days of data in a health zone to be able to forecast.
 
 
-
+%% What does it all mean?
+%%  -- Interpret repproduction number
+%%  -- Reiterate why we do it:
+%%  -- Likely path of the epidemic - incude why uncertainty is important
+%%  -- need dimensions of control effort - is the control working?
+%%  -- subnational prioritisation of control efforts 
 
 %% Model selection. Pheno vs compartmental
+%% What epidemiological question are we answering?
+%% flexible model part can do well
+
 
 %% Improvments: Full baysian model, hierracical model that includes spread from HZ to HZ, now only including internal spread.
+%% Why a generative model is good?
 
-%% Useulness
 
 
 \section{Conclusions}

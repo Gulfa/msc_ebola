@@ -96,6 +96,7 @@ BranchingModel <- R6Class(
 
     
     predict=function(predict_days, N=1000){
+      print("predict")
       first_day <- predict_days[1] - 1
       if(predict_days[1] < 11){
         stop("First prediction day should be at least 10")
@@ -164,7 +165,7 @@ R_latest_value <- function(days, self, N=1){
 
 
 R_semilocal <- function(days, self, N=1){
-
+  print("R")
   last_day_before <- days[1] - 1
   mean_r <-  self$R[["Mean(R)"]][!is.na(self$R[["Mean(R)"]]) &
                                  self$R[["t_end"]] <= last_day_before]
@@ -175,13 +176,14 @@ R_semilocal <- function(days, self, N=1){
   log_r <- log(mean_r / (b - mean_r))
   
   ss <- AddSemilocalLinearTrend(list(), log_r, slope.ar1.prior = NormalPrior(0, 0.1))
-#                                level.sigma.prior = SdPrior(0.01, sample.size = 200))
-  model <- bsts(log_r, state.specification = ss, niter = N + 100, ping=0)
+                                        #                                level.sigma.prior = SdPrior(0.01, sample.size = 200))
+  print("before mode")
+  model <- bsts(log_r, state.specification = ss, niter = N + 100, ping=0, )
 
   predicted <- predict(model, horizon=length(days), burn=100)$distribution
 
   return_value <- b*exp(predicted) / (1 + exp(predicted))
-
+  print("end R")
   return(t(return_value))
 }
 

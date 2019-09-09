@@ -3,6 +3,7 @@ library(dplyr)
 library(tie)
 library(tidyr)
 library(scoringRules)
+library(matrixStats)
 prob <- function(dist, value){
   if(value == -1){
     return(0)
@@ -46,9 +47,9 @@ PIT <- function(data, N=10){
 
 
 daily_score <- function(data){
-  predictions <- as.matrix(as.matrix(data %>% dplyr::select(starts_with("V", ignore.case=FALSE))))
+  predictions <- as.matrix(data %>% dplyr::select(starts_with("V", ignore.case=FALSE)))
   values <- data %>% pull(value)
-  return(c(values,
+  return(list(
            sharpness_madn(predictions),
            bias(values, predictions),
            crps_sample(values, predictions),
@@ -72,15 +73,17 @@ evaluate <- function(data, cores=1){
 
   }
   
+  
+  d <- data %>% filter(!is.na(value))
+  scores <- daily_score(d)
+  by_start_day <- d %>% mutate(sharpness=scores[[1]],
+                    bias=scores[[2]],
+                    crps=scores[[3]],
+                    dss=scores[[4]]
+                    )
+  print("Starting PIT")
   PIT_results <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=cores))
-
-  evaluate_scores_day <- function(x_day){
-    return(data %>% filter(!is.na(value) & day==x_day) %>%
-     group_by(start_day, day, model, location) %>% 
-    do( bow(., tie(value,sharpness,bias,crps,dss):=daily_score(.))))
-  }
-    
-  by_start_day <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_scores_day, mc.cores=cores))
+  
   total <- by_start_day %>% group_by(model, location, day) %>%
     summarize(sharpness=mean(sharpness),
               bias=mean(bias),
@@ -103,7 +106,7 @@ test_uniform <- function(data){
 
 
 sharpness_madn <- function(predictions){
-  return(1/0.625 *median(abs(predictions - median(predictions))))
+  return(1/0.625 *rowMedians(abs(predictions - rowMedians(predictions))))
   
 }
 
