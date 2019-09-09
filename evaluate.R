@@ -14,7 +14,7 @@ prob <- function(dist, value){
 PIT <- function(data, N=10){
   p_values <- c()
   centralities <- c()
-  predictions <- as.matrix(data %>% select(starts_with("V")))
+  predictions <- as.matrix(data %>% dplyr::select(starts_with("V", ignore.case=FALSE)))
   values <- data %>% pull(value)
   for( j in 1:N){
     us <- as.numeric(length(values))
@@ -46,15 +46,13 @@ PIT <- function(data, N=10){
 
 
 daily_score <- function(data){
-  predictions <- as.matrix(as.matrix(data %>% select(starts_with("V"))))
+  predictions <- as.matrix(as.matrix(data %>% dplyr::select(starts_with("V", ignore.case=FALSE))))
   values <- data %>% pull(value)
-
-  return( c(values,
-            sharpness_madn(predictions),
-            bias(values, predictions),
-            crps_sample(values, predictions),
-            
-            dss_sample(values, predictions))
+  return(c(values,
+           sharpness_madn(predictions),
+           bias(values, predictions),
+           crps_sample(values, predictions),
+           dss_sample(values, predictions))
          )
 
             

@@ -56,10 +56,12 @@ BranchingModel <- R6Class(
     fit=function(){
       incidence <- self$incidence
       x <- estimate_R(incidence, 
-                      config = make_config(
+                      config = make_config(list(
+                        cv_posterior=2,
                         t_start=2:(length(incidence)-7),
-                        t_end=9:length(incidence), mean_si=self$Mean.SI,
-                        std_si=self$Std.SI),
+                        t_end=9:length(incidence),
+                        mean_si=self$Mean.SI,
+                        std_si=self$Std.SI)),
                       method="parametric_si")
       self$R <- x$R
       self$serial<- x$si_distr
@@ -164,8 +166,8 @@ R_latest_value <- function(days, self, N=1){
 R_semilocal <- function(days, self, N=1){
 
   last_day_before <- days[1] - 1
-  mean_r <-  self$R["Mean(R)"][[1]][9:last_day_before]
-
+  mean_r <-  self$R[["Mean(R)"]][!is.na(self$R[["Mean(R)"]]) &
+                                 self$R[["t_end"]] <= last_day_before]
   b <- 15
 
   mean_r[mean_r >= b] <-  b - 0.1
@@ -179,6 +181,7 @@ R_semilocal <- function(days, self, N=1){
   predicted <- predict(model, horizon=length(days), burn=100)$distribution
 
   return_value <- b*exp(predicted) / (1 + exp(predicted))
+
   return(t(return_value))
 }
 
@@ -194,3 +197,4 @@ plot_r_pred <- function(predicted){
 
 
 }
+

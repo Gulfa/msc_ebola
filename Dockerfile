@@ -20,7 +20,9 @@ RUN install2.r --error \
     --deps TRUE \
     geojsonio \
     ggrepel \
-    ISOweek
+    ISOweek \
+    matrixStats
+
 
 RUN Rscript -e 'devtools::install_github("dirkschumacher/rhxl")'
 

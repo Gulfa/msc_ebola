@@ -9,7 +9,7 @@
 \allowdisplaybreaks
 
 \usepackage[bottom=2.54cm, top=2.54cm, left=2.54cm, right=2.54cm]{geometry}
-\title{Real-time probabelistic forecasts of the 2018 -- 2019 Ebola outbreak in the Democratic Republic of Congo}
+\title{Real-time probabelistic forecasts for the 2018 -- 2019 Ebola outbreak in Northern Democratic Republic of Congo}
 \author{
   CANDIDATE NUMBER
 }
@@ -60,26 +60,27 @@ In this thesis we will present a semi-mechanisitc model that includes some mecha
 \section{Methods}
 
 \subsection{Data}
-We will use daily incidence data from the North Kivu Ebola outbreak as reported by the Ministry of Health in Congo and distributed via the humanitarian data exchange (https://data.humdata.org/dataset/ebola-cases-and-deaths-drc-north-kivu) before the 1st of September 2019. We will use the incidence of confimed cases at the national and at the health-zone level. We use confirmed cases so that estimates of the reproduction number and other epidemiological parameters correspond only to Ebola and not Ebola and Ebola-like illnesess. Due to the nature of the outbreak and the nature of the data some confirmed cases are later found to not be Ebola. This can lead to days with negative incidence, we have chosen to set any negative incidence to zero. Data are missing for some days, for these days we lineraly interpolate the incidence. 
+We will use daily incidence data from the North Kivu Ebola outbreak as reported by the Ministry of Health in Congo and distributed via the humanitarian data exchange before the 1st of September 2019 \cite{EbolaCasesDeaths}. We will use the incidence of confimed cases at the national and at the health-zone level. We use confirmed cases so that estimates of the reproduction number and other epidemiological parameters correspond only to Ebola and not Ebola and Ebola-like illnesess. Due to the nature of the outbreak and the nature of the data some confirmed cases are later found to not be Ebola. This can lead to days with negative incidence, we have chosen to set any negative incidence to zero. Data are missing for some days, for these days we lineraly interpolate the incidence. 
 
 \subsection{Model}
 
-We consider a model where the daily incidence, $I_t$ follows a branching process. Similar models have been considered in \cite{coriNewFrameworkSoftware2013,lloyd-smithSuperspreadingEffectIndividual2005,nouvelletSimpleApproachMeasure2018} and have been used to model Ebola during the 2014-2016 Ebola outbreak in Wester Africa \cite{EbolaVirusDisease2014, internationalebolaresponseteamExposurePatternsDriving2016}. In this class of models each infectious person gives rise to $\nu$ new infections, where $\nu$ is a random variable distributed with an offspring distribution with an expected value given by the reproduction number $R$. We use the serial interval to model the time between each generation of infections. This gives a process where the expected number of new cases at time $t$ is given by the force of infection $\lambda_t$. The force of infection is a product of previous incidence weighted by the serial interval $w_\tau$ and the instaneous reproduction number $R_t$. 
+We consider a model where the daily incidence, $I_t$ follows a modified branching process. Similar models have been considered in \cite{coriNewFrameworkSoftware2013,lloyd-smithSuperspreadingEffectIndividual2005,nouvelletSimpleApproachMeasure2018} and have been used to model Ebola during the 2014-2016 Ebola outbreak in Wester Africa \cite{EbolaVirusDisease2014, internationalebolaresponseteamExposurePatternsDriving2016}. In this class of models each infectious person gives rise to $\nu$ new infections, where $\nu$ is a random variable distributed with an offspring distribution with an expected value given by the reproduction number $R$. We use the serial interval to model the time between each generation of infections. This gives a process where the expected number of new cases at time $t$ is given by the force of infection $\lambda_t$ which is a product of previous incidence weighted by the serial interval $w_\tau$ and the instaneous reproduction number $R_t$. 
 
 \[ E(I_t) = \lambda_t =  R_t \sum^{t-1}_{s=1} I_s w_{t-s}\]
 
-To fully specify the model we need to determine the probability distribution for $I_t$, the serial interval and the reproduction number as a function of time. For the serial interval we will use  a gamma-distribution with mean 15.3 days and standard deviation of 9.3 days as fitted to data from the West-Africa Ebola outbreak \cite{EbolaVirusDisease2014}. Our general approach will be to use a few different spesifications for the $I_t$ probability distribution and for estimating the time-varying reproduction number and then assess which model gives the best fit to the data. 
+To fully specify the model we need to determine the probability distribution for $I_t$, the serial interval and the reproduction number as a function of time. For the serial interval we will use  a gamma-distribution with mean 15.3 days and standard deviation of 9.3 days as fitted to data from the West-Africa Ebola outbreak \cite{EbolaVirusDisease2014}. Our general approach will be to use a few different spesifications for the $I_t$ probability distribution and for estimating the time-varying reproduction number and then assess which model gives the best fit to the data.
+
 \subsubsection{Offspring distribution}
 The offspring distribution gives us the distribution of the number new infections from each infected person. By definition the expected value of this distribution is the reproduction number. The offspring distribution is a discrete probability distribution over the non-negative integers. The simplest such distribution is the poisson distribution, it is given by
 
 \[P(X=k) = \exp{-\lambda}\frac{\lambda^k}{k!}, \]
 with mean and variance given by $\lambda$. This distribution implies that the number of new infections over a time interval is described by a constant rate where the chance of a new infection in each small sub-interval is independent.
 
-For a number of diseases it has been shown that offspring distribution has larger variance than that given by the poisson distribution and has so called superspreaders \cite{lloyd-smithSuperspreadingEffectIndividual2005}. One common way of modelling this over-dispersed distribution is by the negative binomial distribution. The binomial distribution describes a process where we have a series of indepdent chances to infect a new interval each with probabilty $p$, where the process continues until we have had $r$ infection chances without an infection. The distribution is given by
+For a number of diseases it has been shown that the offspring distribution has larger variance than that given by the poisson distribution and has so called superspreaders \cite{lloyd-smithSuperspreadingEffectIndividual2005}. One common way of modelling this over-dispersed distribution is by the negative binomial distribution. The negative binomial distribution describes a process where we have a series of indepdent chances to infect a new interval each with probabilty $p$, where the process continues until we have had $r$ infection chances without an infection. The distribution is given by
 
 \[P(X=k) = {k + r - 1 \choose k} (1-p)^rp^k, \]
 
-with $E(X)=\frac{pr}{1-p}$ and $Var(X) = \frac{pr}{(1-p)^2}$. We will use a parameterisation of the negative binomial distribution where we use the mean, $\mu$ and the dispersion parameter $k$. In this formulation the variance is given by $\mu(1 + \frac{1}{k})$. For $k->\infty$ we would get a poisson ditribution. The smaller $k$ is the more the outbreak is dominated by a few super-spreaders and the larger $k$ is the more similar the impact of each infected person is. For SARS it has been found that $k=0.16$\cite{lloyd-smithSuperspreadingEffectIndividual2005}. For the Ebola outbreak in West Africa they found $k=0.53$ using conservative assumptions and data from the network of infections \cite{internationalebolaresponseteamExposurePatternsDriving2016}. The different offspring distributions ca be seen in Figure \ref{fig:offspring}
+with $E(X)=\frac{pr}{1-p}$ and $Var(X) = \frac{pr}{(1-p)^2}$. We will use a parameterisation of the negative binomial distribution where we use the mean, $\mu$ and the dispersion parameter $k$. In this formulation the variance is given by $\mu(1 + \frac{1}{k})$. For $k->\infty$ we get a poisson ditribution. The smaller $k$ is the more the outbreak is dominated by a few super-spreaders and the larger $k$ is the more similar the impact of each infected person is. For SARS it has been found that $k=0.16$\cite{lloyd-smithSuperspreadingEffectIndividual2005}. For the Ebola outbreak in West Africa they found $k=0.53$ using conservative assumptions and data from the network of infections \cite{internationalebolaresponseteamExposurePatternsDriving2016}. The different offspring distributions ca be seen in Figure \ref{fig:offspring}
 
 \begin{figure}[h]
   \centering
@@ -87,9 +88,6 @@ with $E(X)=\frac{pr}{1-p}$ and $Var(X) = \frac{pr}{(1-p)^2}$. We will use a para
   \caption{Poisson and negative binomial offspring distirubtions with a mean of 10.}
   \label{fig:offspring}
 \end{figure}
-
-
-
 
 The distribution for $I_t$ would be given by the sum of the offspring distributions for each infected person (weighted by the serial distribution). For both the poisson and negative binomial distribution the sum of independent distriubtions will give back the same distribution with an expected value given by the sum of the expected values. For the negative binomial distribution the dispersion parameter $k$ will remain the same. 
 
@@ -112,9 +110,7 @@ We use the R-package BSTS \cite{scottBstsBayesianStructural2019} to fit the basy
 
 \[r^*_{t+1} = r^*_t + \delta_t + \epsilon_t, \epsilon_t \sim N(0, \sigma_\mu),\]
 \[\delta_{t+1} = D + \phi(\delta_t - D) + \eta_t, \eta_t \sim N(0, \sigma_\delta).\]
-$\delta_t$ is the semi-local trend that we model as an AR(1) process that can oscilate around a level $D$. Inverse gamma-priors are used for the standar deviation parameters $\sigma_\mu$ and $\sigma_\delta$, a gaussian prior on $D$ and a $N(0, 0.1)$ prior for $\phi$. The $\phi$ parameter determines how much the trend behaves as a random-walk. For $\phi=1$ the trend follows a random walk, while for $\phi=0$ the trend is just constant with some noice. We use a prior for small values of $\phi$ to keep the model for having very rapid growth in the variance of $r*$ that would be unphysical. 
-
-**Example of evolution**
+$\delta_t$ is the semi-local trend that we model as an AR(1) process that can oscilate around a level $D$. Inverse gamma-priors are used for the standar deviation parameters $\sigma_\mu$ and $\sigma_\delta$, a gaussian prior on $D$ and a $N(0, 0.1)$ prior for $\phi$. The $\phi$ parameter determines how much the trend behaves as a random-walk. For $\phi=1$ the trend follows a random walk, while for $\phi=0$ the trend is just constant with some noice. We use a prior for small values of $\phi$ to keep the model for having very rapid growth in the variance of $r^*$ that would be unphysical. 
 
 A Markow Chain Monte Carlo (MCMC) algorithm is used to estimate the parameters in the model which then allows us to predict future values of $r*$ with uncertainties, we then transform back to the $R$. 
 
@@ -154,10 +150,10 @@ The DSS allows an intuitive understanding of the proper scoring rules. The first
 The models were implemented in the R programming langauge \cite{rcoreteamLanguageEnvironmentStatistical2018} and is available open source at http://github.com/gulfa/msc\_ebola. We will consider four differrent models to assess which model fits the data best. The models are:
 
 \begin{enumerate}
-\item{Model 1(Basic): Constant reproduction number and poisson offspring distribution}
-\item{Model 2(NegBin): Constant reproduction number and negative binomial offspring distribution}
-\item{Model 3(Varrying Reproduction Number): Varrying eproduction number and poissonoffspring distribution}
-\item{Model 4(Full): Varrying reproduction number and negative binomial offspring distribution}
+\item{Model 1 (Poisson Latest): Constant reproduction number and poisson offspring distribution}
+\item{Model 2 (NegBin Latest): Constant reproduction number and negative binomial offspring distribution}
+\item{Model 3 (Poisson Semilocal): Varrying eproduction number and poissonoffspring distribution}
+\item{Model 4 (NegBin Semilocal): Varrying reproduction number and negative binomial offspring distribution}
 \end{enumerate}
 
 For the dispersion parameter $k$ for the negative binomial models we fit a value for the simple negativebinomial model by minimising the continous ranked probability score for the one day ahead predictions for the model on the level of the whole outbreak. 
@@ -239,7 +235,9 @@ Evaluations for each health zone for the Poisson Semilocal model in Table \ref{t
 \section{Discussion}
 
 
-\subsection{Limitations}
+
+
+{\bf Limitations}
 The data source for the model is the cummulative number of cases by days. We calculate the incidence as the difference in cummulative cases. This data source has many disadvantages to for example having a line list of all cases. A line list would give a much better idea of the data of onset of disease, it would remove the problem with negative incidence rates after corrections and any problems with having to interpolate incidence rates.
 
 It is a strength of the modelling approach that it can be used on less than ideal data to still give reasonable short-term forecasts. In outbreak situations having up-to-date linelists of cases can be difficult or impossible, but we would still like to give reasonable forecasts. 

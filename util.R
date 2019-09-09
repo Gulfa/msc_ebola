@@ -101,16 +101,16 @@ read_data <- function(in_date){
 
 }
 
-run_model <- function(run){
+run_model <- function(run, N=1000){
   model <- run[["model"]]
   data <- data.table(data.frame(run[["data"]]))
   max_predict <- run[["max_predict"]]
   
-  start_day <- max(16, min(data[incidence >0, days]))
+  start_day <- max(18, min(data[incidence >0, days]))
 
   results <- data.table()
    
-  results <- day_ahead_prediction(model, start_day=start_day, days_ahead = max_predict, N=1000)
+  results <- day_ahead_prediction(model, start_day=start_day, days_ahead = max_predict, N=N)
   results[, model:=run[["model_name"]]]
   results[, location:=run[["location"]]]
   return(results)

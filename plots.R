@@ -1,6 +1,4 @@
 source("util.R")
-
-
 library(geojsonio)
 library(data.table)
 library(broom)

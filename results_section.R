@@ -3,8 +3,11 @@ source("util.R")
 library(dplyr)
 library(ggplot2)
 library(xtable)
+library(matrixStats)
 
 data <- read_data("2019-09-01")
+model_data <- prepare_data_model(data$national,
+                                 data$health_zone)
 
 
 hz <- data$health_zone
@@ -109,5 +112,68 @@ latex_table_by_hz <- xtable(table_by_hz,
 print.xtable(latex_table_by_hz, type="latex", file="output/by_hz_tables.tex")
 
   
+
+                                        # BEST model
+
+model_conf <- list(
+  desc="poisson_bsts",
+  new_cases=new_cases_poisson,
+  R_func=R_semilocal)
+
+
+model <- fit_model(model_data$national, model_conf$desc, model_conf$new_cases, model_conf$R_func)
+
+res <- run_model(list(model=model,
+                      model_name="Best",
+                      location="national",
+                      max_predict=28,
+                      data=model_data$national))
+
+max_day = max(model_data$national$days)
+show_days <- c(50,100, 150, 200, 250, 300, 350, max_day)
+
+pred <- data.table(days=1:(max_day + 28),
+                   pred=as.numeric(NA),
+                   upper=as.numeric(NA),
+                   lower=as.numeric(NA),
+                   value=c(model_data$national$incidence, NA*numeric(length=28)))
+Rs <-  data.table(days=min(model$R[["t_end"]]):(max_day + 28),
+                   pred=as.numeric(NA),
+                   upper=as.numeric(NA),
+                   lower=as.numeric(NA),
+                   value=c(model$R[["Mean(R)"]], NA*numeric(length=28)))
+
+
+
+for(show_day in show_days){
+  print(show_day)
+  predictions <- res %>%  filter(start_day==show_day)
+  predictions <- as.matrix(predictions %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
+  mean_I <- rowQuantiles(predictions, probs=0.5)
+  quantiles <- rowQuantiles(predictions, probs=c(0.05, 0.95))
+  pred[days %in% c(show_day:(show_day+27)), pred:=mean_I]
+  pred[days %in% c(show_day:(show_day+27)), upper:=quantiles[, 2]]
+  pred[days %in% c(show_day:(show_day+27)), lower:=quantiles[, 1]]
+
+  R_pred <- R_semilocal(show_day:(show_day + 27), model, N=1000)
+  mean_R <- rowQuantiles(R_pred, prob=0.5)
+  quantiles <- rowQuantiles(R_pred, probs=c(0.05, 0.95))
+  Rs[days %in% c(show_day:(show_day+27)), pred:=mean_R]
+  Rs[days %in% c(show_day:(show_day+27)), upper:=quantiles[, 2]]
+  Rs[days %in% c(show_day:(show_day+27)), lower:=quantiles[, 1]]
+  
+}
+
+
+max <- 70
+pred[upper >= max, upper:=max]
+
+ggplot(pred) + geom_line(aes(x=days, y=value)) +
+  geom_line(aes(x=days, y=pred), color="red") +
+  geom_ribbon(aes(x=days, ymin=lower, ymax=upper, group=1), alpha=0.4) 
+
+ggplot(Rs) + geom_line(aes(x=days, y=value)) +
+  geom_line(aes(x=days, y=pred), color="red") +
+  geom_ribbon(aes(x=days, ymin=lower, ymax=upper, group=1), alpha=0.4) 
 
 
