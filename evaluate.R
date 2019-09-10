@@ -64,7 +64,7 @@ daily_score <- function(data){
 
 
 evaluate <- function(data, cores=1){
-
+  setDT(data)
   evaluate_PIT_day <- function(x_day){
     return(data %>% filter(!is.na(value), day==x_day) %>%
       group_by(model, day, location) %>% 
@@ -88,7 +88,7 @@ evaluate <- function(data, cores=1){
     summarize(sharpness=mean(sharpness),
               bias=mean(bias),
               crps=mean(crps),
-              dss=mean(dss))
+              dss=mean(dss, na.rm=T))
   
   
   

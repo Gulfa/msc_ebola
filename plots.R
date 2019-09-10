@@ -63,7 +63,7 @@ create_map <- function(tot_data, column, legend_title){
 plot_r <- function(r_object, start_day){
 
   setDT(r_object)
-  r_object[, date:=start_day + T.Start]
+  r_object[, date:=start_day + t_start]
   q <- ggplot(r_object) + geom_line(aes(x=date, y=get("Mean(R)"))) +
     geom_ribbon(aes(x=date, ymin=get("Quantile.0.025(R)"), ymax=get("Quantile.0.975(R)")), alpha=0.3) +
     theme_bw() + xlab("Date") + ylab("Reproduction Number")
@@ -196,12 +196,12 @@ create_score_table_regional <- function(results, days){
 
 
 
-plot_scores <- function(scores){
+plot_scores <- function(scores, location){
 
   for(col in c("calibration", "bias", "sharpness", "centrality", "crps", "dss")){
     q <- ggplot(scores) + geom_line(aes(x=day, y=get(col), color=model)) +
       scale_color_brewer("Models", palette = "Dark2") + theme_bw() + ylab(col) + xlab("Forecasting Horizon") 
-    ggsave(glue::glue("output/{col}.png"), width=7, heigh=3)
+    ggsave(glue::glue("output/{location}_{col}.png"), width=7, height=3)
   }
 }
 

@@ -11,7 +11,7 @@
 \usepackage[bottom=2.54cm, top=2.54cm, left=2.54cm, right=2.54cm]{geometry}
 \title{Real-time probabelistic forecasts for the 2018 -- 2019 Ebola outbreak in Northern Democratic Republic of Congo}
 \author{
-  CANDIDATE NUMBER
+  CANDIDATE NUMBER2
 }
 \date{\today}
 
@@ -163,30 +163,35 @@ We will assess how well the models work both for the entire epidemic and for eac
 
 
 \section{Results}
-From the start of the outbreak until the 31st of August 2019 there has been 2,926 confirmed ebola cases and 1926 confirmed ebola deaths. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed a more varied period where the reproduction number varied around 1. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. From the epi-curve there seems to a connection between the peaks and the large increases in specific health zones. So that pattern is in part driven by introduction or reintroduciton to individual health zones. 
+From the start of the outbreak until the 31st of August 2019 there has been 2,926 confirmed ebola cases and 1926 confirmed ebola deaths. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed a more varied period where the reproduction number varied around 1. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. From the epi-curve there seems to a connection between the peaks and the large increases in specific health zones. So that pattern is in part driven by introduction or reintroduciton to individual health zones.
 
 \begin{figure}[h]
+\begin{subfigure}{0.48\textwidth}
   \centering
-  \includegraphics[width=0.7\textwidth]{../output/epi_curve.png}
+
+  % include first image
+  \includegraphics[width=\textwidth]{../output/epi_curve.png}
   \caption{Number of new confirmed cases by week in the health zones with the most Ebola Cases}
   \label{fig:epi_curve}
-\end{figure}
-
-\begin{figure}[h]
+\end{subfigure}
+\begin{subfigure}{0.48\textwidth}
   \centering
-  \includegraphics[width=0.7\textwidth]{../output/tot_map.png}
-
+  \includegraphics[height=5.7cm]{../output/tot_map.png}
   \caption{Total number of confirmed cases by Health Zone}
   \label{fig:tot_map}
+\end{subfigure}
+
+%% \bigskip
+
+%% \begin{subfigure}{\textwidth}
+%%   \centering
+%%   \includegraphics[width=0.7\textwidth]{../output/nat_rep.png}
+%%   \caption{Reprodcution number as a function of time, the shaded region shows the 95\% credible interval}
+%%   \label{fig:rep_num}
+%% \end{subfigure}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7\textwidth]{../output/nat_rep.png}
-  \caption{Reprodcution number as a function of time, the shaded region shows the 95\% credible interval}
-  \label{fig:rep_num}
-\end{figure}
-
+\subsection{National level}
 We first found that the dispersion parameter that gives the smallest CRPS score for one day ahead predictions for the negative binomial models was k=8. Morevariance than a poisson distribution, but much less than found in previous Ebola outbreaks as discussed above. 
 
 On the level of the whole outbreak, the score for our four models for different forecasting horizons can be seen in Table \ref{tab:nat_evo}.The evolution of the score can also be seen in Figure \ref{fig:nat_scores}
@@ -197,7 +202,7 @@ On the level of the whole outbreak, the score for our four models for different 
 \begin{subfigure}{\textwidth}
   \centering
   % include first image
-  \includegraphics[width=0.7\linewidth]{../output/national_crps.png}  
+  \includegraphics[width=0.9\linewidth]{../output/national_crps.png}  
   \caption{Contineously Ranked Probability Score}
   \label{fig:sub-first}
 \end{subfigure}
@@ -205,14 +210,14 @@ On the level of the whole outbreak, the score for our four models for different 
 \begin{subfigure}{\textwidth}
   \centering
   % include second image
-  \includegraphics[width=0.7\linewidth]{../output/national_calibration.png}  
+  \includegraphics[width=0.9\linewidth]{../output/national_calibration.png}  
   \caption{Calibration p-value}
   \label{fig:sub-second}
 \end{subfigure}
 \begin{subfigure}{\textwidth}
   \centering
   % include second image
-  \includegraphics[width=0.7\linewidth]{../output/national_bias.png}  
+  \includegraphics[width=0.9\linewidth]{../output/national_bias.png}  
   \caption{Bias}
   \label{fig:sub-third}
 \end{subfigure}
@@ -223,13 +228,40 @@ On the level of the whole outbreak, the score for our four models for different 
 
 Together they show that for next day forecast, the negative binomial offspring distirbution is needed for a calibrated forecast. The negative binomial distribution is clearly needed for a calibrated forecast even for one day ahead predictions. For longer forecasting horizons the poisson distribution with the semilocal time series prediction for $R_t$ is the best model and is calibrated out to about 12 days. From the centrality scores, we can see that both the models with time series are overestimating the dispersion and the negative binomial model more so than the poisson model. Based on the scoring rules the two time series models are signficantly better than the models without any evaluation in $R_t$.
 
-We provide a forecast for this model for the next 28 days in Figure XX and based on the current evaluation of 
+To understand the local poisson model better we calculate 28 day forecasts every 50 days of the outbreak and compared those forecasted incidence values with observed values. This can be seen in Figure \ref{fig:nat_pred}. In the same figure we also plot the estimated values of the reproduction number together with 28 day forecasts for the same model. We see reasonable predictions, especially in the short term. We also here see that the model probably overestimates the uncertainty in both the reproduction number and the incidence. 
+\begin{figure}[h]
+\begin{subfigure}{\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=0.9\linewidth]{../output/national_predictions.png}  
+  \caption{Forecasted and predicted incidence for the semilocal poisson model}
+  \label{fig:sub-first}
+\end{subfigure}
 
-The averaged evaluations when we predicted the future incidence for individual health zones can be seen in Table \ref{tab:hz_evo}.
-\input{../output/hz_tables}
+\begin{subfigure}{\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=0.9\linewidth]{../output/national_Rs.png}  
+  \caption{Forecasted and predicted repreoduction numbers for the semilocal poisson model}
+  \label{fig:sub-second}
+\end{subfigure}
+  \caption{Median forecast with 95\% prediction intervals and observed values for incidence and reproduction number for the semilocal poisson model}.
 
-Evaluations for each health zone for the Poisson Semilocal model in Table \ref{tab:by_hz_evo}.
-\input{../output/by_hz_tables}
+  \label{fig:nat_pred}
+\end{figure}
+
+
+
+
+
+
+\subsection{Health Zones}
+
+%% The averaged evaluations when we predicted the future incidence for individual health zones can be seen in Table \ref{tab:hz_evo}.
+%% \input{../output/hz_tables}
+
+%% Evaluations for each health zone for the Poisson Semilocal model in Table \ref{tab:by_hz_evo}.
+%% \input{../output/by_hz_tables}
 
 
 \section{Discussion}

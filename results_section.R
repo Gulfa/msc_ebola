@@ -1,5 +1,6 @@
 source("plots.R")
 source("util.R")
+source("model.R")
 library(dplyr)
 library(ggplot2)
 library(xtable)
@@ -17,6 +18,9 @@ q <- plot_weekly_incidence(data)
 ggsave("output/epi_curve.png", q, width = 9, height=6)
 
 tot_data <- hz[, .(cases = max(confirmed_cases)), by=health_zone]
+
+q <- create_map(tot_data, "cases", "Total Cases")
+ggsave("output/tot_map.png", q, width=7, height=7)
 
 
 mu <- 10
@@ -40,14 +44,11 @@ df <- data.frame(
 q <- ggplot(df) + geom_line(aes(x=x, y=value, color=Distribution)) + scale_color_brewer("Models", palette = "Dark2") + theme_bw() +xlab("New Cases") + ylab("Probability mass")
 ggsave("output/prob_dist.png", q, width=7, height=5)
   
-q <- create_map(tot_data, "cases", "Total Cases", width=7)
-
-ggsave("output/tot_map.png", q, width=7, height=7)
 
 
 
 
-results <- readRDS("results/latest_working.RDS")
+results <- readRDS("results/latest.RDS")
 
 scores <- readRDS("results/scores.RDS")
 
@@ -57,12 +58,13 @@ overall_scores <- ungroup(scores$overall) %>% mutate(model=recode(model,
                                                 "poisson_latest"="Poisson Latest",
                                                 "nbin_latest"="Negative Binomial Latest"))
 
-q <- plot_r(results[["Basic model"]]$national$model$R, min(hz[, report_date]))
+#q <- plot_r(results[["Basic model"]]$national$model$R, min(hz[, report_date]))
 
-ggsave("output/nat_rep.png", q, width = 9, height=6)
+#ggsave("output/nat_rep.png", q, width = 9, height=6)
 
 
-plot_scores(overall_scores %>% filter(location=="national"))
+plot_scores(overall_scores %>% filter(location=="national"), location="national")
+plot_scores(overall_scores %>% filter(location=="national_combined"), location="national_cobmined")
 
 
 table <- overall_scores %>% filter(location == "national" & day %in% c(1,7,14,21,28))%>%
@@ -80,7 +82,7 @@ latex_table <- xtable(table,
 print.xtable(latex_table, type="latex", file="output/nat_tables.tex")
 
 
-table_hz <- overall_scores %>% filter(location != "national" & day %in% c(1,7,14,21,28)) %>%
+table_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & day %in% c(1,7,14,21,28)) %>%
   group_by(model, day) %>% summarize(crps=mean(crps), dss=mean(dss), calibration=mean(calibration),
                            centrality=mean(centrality), sharpness=mean(sharpness),
                            bias=mean(bias)) %>% arrange(day) %>% rename("horizon"=day)
@@ -96,7 +98,7 @@ latex_table_hz <- xtable(table_hz,
 print.xtable(latex_table_hz, type="latex", file="output/hz_tables.tex")
 
 
-table_by_hz <- overall_scores %>% filter(location != "national" & model== "Poisson Semilocal" & day %in% c(7)) %>%
+table_by_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & model== "Poisson Semilocal" & day %in% c(7)) %>%
   group_by(location, day) %>% summarize(crps=mean(crps), dss=mean(dss), calibration=mean(calibration),
                            centrality=mean(centrality), sharpness=mean(sharpness),
                            bias=mean(bias)) %>% arrange(crps) %>% rename("horizon"=day) %>% inner_join(tot_data, by=c("location"="health_zone"))
@@ -111,9 +113,15 @@ latex_table_by_hz <- xtable(table_by_hz,
 
 print.xtable(latex_table_by_hz, type="latex", file="output/by_hz_tables.tex")
 
-  
 
-                                        # BEST model
+
+
+
+
+
+
+
+# BEST model
 
 model_conf <- list(
   desc="poisson_bsts",
@@ -123,11 +131,7 @@ model_conf <- list(
 
 model <- fit_model(model_data$national, model_conf$desc, model_conf$new_cases, model_conf$R_func)
 
-res <- run_model(list(model=model,
-                      model_name="Best",
-                      location="national",
-                      max_predict=28,
-                      data=model_data$national))
+res <- results %>% filter(location == "national" & model=="poisson_bsts")
 
 max_day = max(model_data$national$days)
 show_days <- c(50,100, 150, 200, 250, 300, 350, max_day)
@@ -168,12 +172,30 @@ for(show_day in show_days){
 max <- 70
 pred[upper >= max, upper:=max]
 
-ggplot(pred) + geom_line(aes(x=days, y=value)) +
+q <- ggplot(pred) + geom_line(aes(x=days, y=value)) +
   geom_line(aes(x=days, y=pred), color="red") +
   geom_ribbon(aes(x=days, ymin=lower, ymax=upper, group=1), alpha=0.4) 
 
-ggplot(Rs) + geom_line(aes(x=days, y=value)) +
+ggsave("output/national_predictions.png", q)
+
+
+q <- ggplot(Rs) + geom_line(aes(x=days, y=value)) +
   geom_line(aes(x=days, y=pred), color="red") +
   geom_ribbon(aes(x=days, ymin=lower, ymax=upper, group=1), alpha=0.4) 
+ggsave("output/national_Rs.png", q)
 
 
+
+nat <- results %>% filter(location == "national" & day==1 &
+                            model=="poisson_bsts")
+predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
+mean_I <- rowQuantiles(predictions, probs=0.5)
+
+nat <- results %>% filter(location == "national_combined" & day==1 &
+                            model=="poisson_bsts")
+predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
+mean_I_comb <- rowQuantiles(predictions, probs=0.5)
+d = 1:length(mean_I)
+length(mean_I)
+q <- ggplot() + geom_line(aes(x=1:length(mean_I_comb), y=mean_I_comb)) # geom_line(aes(x=d, y=mean_I))#
+ggsave("output/test.png", q)
