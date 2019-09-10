@@ -205,6 +205,70 @@ plot_scores <- function(scores, location){
   }
 }
 
+
+
+plot_preds <- function(model_conf, data, x_location, results){
+  model <- fit_model(data, model_conf$desc, model_conf$new_cases, model_conf$R_func)
+
+  res <- results %>% filter(location == x_location & model==model_conf$desc)
+
+  max_day = max(data$days)
+  show_days <- c(50,100, 150, 200, 250, 300, 350, max_day)
+  
+  pred <- data.table(days=1:(max_day + 28),
+                     pred=as.numeric(NA),
+                     upper=as.numeric(NA),
+                     lower=as.numeric(NA),
+                     value=c(data$incidence, NA*numeric(length=28)))
+  Rs <-  data.table(days=min(model$R[["t_end"]]):(max_day + 28),
+                    pred=as.numeric(NA),
+                    upper=as.numeric(NA),
+                    lower=as.numeric(NA),
+                    value=c(model$R[["Mean(R)"]], NA*numeric(length=28)))
+  for(show_day in show_days){
+
+    predictions <- res %>%  filter(start_day==show_day)
+    if(nrow(predictions) == 0){
+      next
+    }
+    predictions <- as.matrix(predictions %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
+    mean_I <- rowQuantiles(predictions, probs=0.5)
+    quantiles <- rowQuantiles(predictions, probs=c(0.05, 0.95))
+    pred[days %in% c(show_day:(show_day+27)), pred:=mean_I]
+    pred[days %in% c(show_day:(show_day+27)), upper:=quantiles[, 2]]
+    pred[days %in% c(show_day:(show_day+27)), lower:=quantiles[, 1]]
+    
+    R_pred <- R_semilocal(show_day:(show_day + 27), model, N=1000)
+    mean_R <- rowQuantiles(R_pred, prob=0.5)
+    quantiles <- rowQuantiles(R_pred, probs=c(0.05, 0.95))
+    Rs[days %in% c(show_day:(show_day+27)), pred:=mean_R]
+    Rs[days %in% c(show_day:(show_day+27)), upper:=quantiles[, 2]]
+    Rs[days %in% c(show_day:(show_day+27)), lower:=quantiles[, 1]]
+    
+  }
+  
+  
+  max <- 70
+  pred[upper >= max, upper:=max]
+  
+  q <- ggplot(pred) + geom_line(aes(x=days, y=value)) +
+    geom_line(aes(x=days, y=pred), color="red") +
+    geom_ribbon(aes(x=days, ymin=lower, ymax=upper, group=1), alpha=0.4) +
+    ylab("Incidence")
+  
+  ggsave(glue::glue("output/{x_location}_predictions.png"), q)
+  
+  max <- 15
+  Rs[pred >= max, pred:=max]
+  
+  q <- ggplot(Rs) + geom_line(aes(x=days, y=value)) +
+    geom_line(aes(x=days, y=pred), color="red") +
+    geom_ribbon(aes(x=days, ymin=lower, ymax=upper, group=1), alpha=0.4) + ylim(0, max)
+  ggsave(glue::glue("output/{x_location}_Rs.png"), q) + ylab("Reproduction Number")
+}
+  
+
+
 #create_score_table_regional(results, day)
 
                                
