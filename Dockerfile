@@ -21,7 +21,8 @@ RUN install2.r --error \
     geojsonio \
     ggrepel \
     ISOweek \
-    matrixStats
+    matrixStats \
+    mapproj
 
 
 RUN Rscript -e 'devtools::install_github("dirkschumacher/rhxl")'
