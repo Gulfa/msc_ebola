@@ -201,7 +201,7 @@ plot_scores <- function(scores, location){
   for(col in c("calibration", "bias", "sharpness", "centrality", "crps", "dss")){
     q <- ggplot(scores) + geom_line(aes(x=day, y=get(col), color=model)) +
       scale_color_brewer("Models", palette = "Dark2") + theme_bw() + ylab(col) + xlab("Forecasting Horizon") 
-    ggsave(glue::glue("output/{location}_{col}.png"), width=7, height=3)
+    ggsave(glue::glue("output/{location}_{col}.png"), width=8, height=2)
   }
 }
 

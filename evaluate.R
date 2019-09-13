@@ -110,9 +110,20 @@ sharpness_madn <- function(predictions){
   
 }
 
+bias_helper <- function(ecdf_function, value){
+  return(1 - (ecdf_function(value) + ecdf_function(value - 1)))
+}
+  
+
 
 bias <- function(value, predictions){
-  return(1 - (ecdf(predictions)(value) + ecdf(predictions)(value - 1)))
+  return(mapply(
+    bias_helper,
+    apply(predictions, 1, ecdf),
+    values
+    )
+  )
+  
 }
 
 day_ahead_prediction <- function(model, start_day=16, days_ahead=1, N=1000){

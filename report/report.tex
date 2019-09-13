@@ -163,7 +163,7 @@ We will assess how well the models work both for the entire epidemic and for eac
 
 
 \section{Results}
-From the start of the outbreak until the 31st of August 2019 there has been 2,926 confirmed ebola cases and 1926 confirmed ebola deaths. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed a more varied period where the reproduction number varied around 1. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. From the epi-curve there seems to a connection between the peaks and the large increases in specific health zones. So that pattern is in part driven by introduction or reintroduciton to individual health zones.
+From the start of the outbreak until the 31st of August 2019 there has been 2,926 confirmed ebola cases and 1926 confirmed ebola deaths, this gives a Case Fatality Rate of 66\% compared to 51\% in the west african outbreak\cite{rojekSystematicReviewMetaanalysis2019}. Figure \ref{fig:epi_curve} shows the weekly number of cases and Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimte of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period were there were no daily surveillance, there was an increase in cases from October 2018 with a large reproduction number, followed by a more varied period where the reproduction number varied around 1 with some waves of larger reproduction number. From March 2019 the number of cases per week increased signficantly, with a continuing large number of cases in June and July even if the reproduction number seems to decrease. From the epi-curve there seems to a connection between the peaks and the large increases in specific health zones. So that pattern is in part driven by introduction or reintroduciton of Ebola to health zones.
 
 \begin{figure}[h]
 \begin{subfigure}{0.48\textwidth}
@@ -191,10 +191,10 @@ From the start of the outbreak until the 31st of August 2019 there has been 2,92
 %% \end{subfigure}
 \end{figure}
 
-\subsection{National level}
-We first found that the dispersion parameter that gives the smallest CRPS score for one day ahead predictions for the negative binomial models was k=8. Morevariance than a poisson distribution, but much less than found in previous Ebola outbreaks as discussed above. 
+\subsection{National level forecasts}
+We first found that the dispersion parameter that gives the smallest CRPS score for one day ahead predictions for the negative binomial models was k=8, but a fairly large range of parameters gave a reasonable fit. $k=8$ is  some more varriance than a poisson distribution, but much less than found in previous Ebola outbreaks as discussed above. 
 
-On the level of the whole outbreak, the score for our four models for different forecasting horizons can be seen in Table \ref{tab:nat_evo}.The evolution of the score can also be seen in Figure \ref{fig:nat_scores}
+All four models were sucesfully fitted on incidence data from 395 days and then used to provide short term forecasts. The calibration and proper scoring rules scores for the four models for different forecasting horizons can be seen in Table \ref{tab:nat_evo} for weekly forcasting horizons up to four weeks. We also show the the evolution of calibration, bias, CRPS and the centrality of PIT values as a function of the forecatsing horizon in Figure \ref{fig:nat_scores}
 \input{../output/nat_tables}
 
 
@@ -220,6 +220,13 @@ On the level of the whole outbreak, the score for our four models for different 
   \includegraphics[width=0.9\linewidth]{../output/national_bias.png}  
   \caption{Bias}
   \label{fig:sub-third}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=0.9\linewidth]{../output/national_centrality.png}  
+  \caption{Centrality of PIT values}
+  \label{fig:sub-fourth}
 \end{subfigure}
   \caption{Scores for the entire outbreak as a function of the forecasting horizon.}
 

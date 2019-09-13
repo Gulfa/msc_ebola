@@ -139,23 +139,46 @@ print.xtable(latex_table_max_calibration, type="latex", file="output/best_hz.tex
 
 
                                         #Health zones
+model_conf_poisson <- list(
+  desc="poisson_latest",
+  new_cases=new_cases_poisson,
+  R_func=R_latest_value)
+
+model_conf_nbin <- list(
+  desc="nbin_latest",
+  new_cases=new_cases_neg_binom,
+  R_func=R_latest_value)
+
 
 for(hz in unique(overall_scores %>% pull(location))){
 
+  if(hs == "national_combined"){
+    next
+  }
+    
   plot_scores(overall_scores %>% filter(location == hz), hz)
+  print(hz)
+  if(hz %in% c("national")){
+    data = model_data$national
+  }else{
+    data = model_data$health_zone[[hz]]
+  }
 
+  if( grepl(largest %>% filter(Location == hz)%>% pull("Best model") , "NegBin Semilocal", fixed=TRUE)){
+    model_conf = model_conf_nbin
+  }else{
+    model_conf = model_conf_poisson
+  }
+  print(model_conf$desc)
+  
+  plot_preds(model_conf,data , hz,results)    
 
 }
 
 
 # BEST model
 
-model_conf <- list(
-  desc="poisson_latest",
-  new_cases=new_cases_poisson,
-  R_func=R_latest_value)
 
-plot_preds(model_conf, model_data$national, "national")
 
 
 plot_preds(model_conf, model_data$health_zone$Beni, "Beni", results)
