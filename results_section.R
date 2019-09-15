@@ -15,12 +15,12 @@ hz <- data$health_zone
 
 q <- plot_weekly_incidence(data)
 
-ggsave("output/epi_curve.png", q, width = 9, height=6)
+ggsave("output/epi_curve.png", q, width = 9, height=7)
 
 tot_data <- hz[, .(cases = max(confirmed_cases)), by=health_zone]
 
 q <- create_map(tot_data, "cases", "Total Cases")
-ggsave("output/tot_map.png", q, width=7, height=7)
+ggsave("output/tot_map.png", q, width=7, height=6)
 
 
 mu <- 10
@@ -28,21 +28,21 @@ x <- 0:40
 df <- data.frame(
   x=x,
   Poisson=dpois(x, lambda=mu),
-  "Binomial9"=dnbinom(x, mu=mu, size=9),
+  "Binomial8"=dnbinom(x, mu=mu, size=8),
   "Binomial3"=dnbinom(x, mu=mu, size=3),
   "Binomial1"=dnbinom(x, mu=mu, size=1),
   "Binomial5"=dnbinom(x, mu=mu, size=0.5)
 ) %>% gather("Distribution", "value", -x) %>% mutate(
                                                 "Distribution" = recode(Distribution,
-                                                                        "Binomial9" = "NegBin(k=9)",
+                                                                        "Binomial8" = "NegBin(k=8)",
                                                                         "Binomial3" = "NegBin(k=3)",
                                                                         "Binomial1" = "NegBin(k=1)",
                                                                         "Binomial5" = "NegBin(k=0.5)",
                                                                         
                                                                         ))
 
-q <- ggplot(df) + geom_line(aes(x=x, y=value, color=Distribution)) + scale_color_brewer("Models", palette = "Dark2") + theme_bw() +xlab("New Cases") + ylab("Probability mass")
-ggsave("output/prob_dist.png", q, width=7, height=5)
+q <- ggplot(df) + geom_line(aes(x=x, y=value, color=Distribution), size=1.2) + scale_color_brewer("Models", palette = "Dark2") + theme_bw() +xlab("New Cases") + ylab("Probability mass") +  theme(text = element_text(size=18))
+ggsave("output/prob_dist.png", q, width=7, height=4)
   
 
 
@@ -82,36 +82,36 @@ latex_table <- xtable(table,
 print.xtable(latex_table, type="latex", file="output/nat_tables.tex",include.rownames=FALSE)
 
 
-table_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & day %in% c(1,7,14,21,28)) %>%
-  group_by(model, day) %>% summarize(crps=mean(crps), dss=mean(dss), calibration=mean(calibration),
-                           centrality=mean(centrality), sharpness=mean(sharpness),
-                           bias=mean(bias)) %>% arrange(day) %>% rename("horizon"=day)
+## table_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & day %in% c(1,7,14,21,28)) %>%
+##   group_by(model, day) %>% summarize(crps=mean(crps), dss=mean(dss), calibration=mean(calibration),
+##                            centrality=mean(centrality), sharpness=mean(sharpness),
+##                            bias=mean(bias)) %>% arrange(day) %>% rename("horizon"=day)
 
-latex_table_hz <- xtable(table_hz,
-                      booktabs=T,
-                      latex.environment ="center",
-                      digits=2,
-                      label=as.character(glue::glue("tab:hz_evo")),
-                      caption=as.character(glue::glue("Model evaluations averaged over all the health-zones"))
-                      )
+## latex_table_hz <- xtable(table_hz,
+##                       booktabs=T,
+##                       latex.environment ="center",
+##                       digits=2,
+##                       label=as.character(glue::glue("tab:hz_evo")),
+##                       caption=as.character(glue::glue("Model evaluations averaged over all the health-zones"))
+##                       )
 
-print.xtable(latex_table_hz, type="latex", file="output/hz_tables.tex")
+## print.xtable(latex_table_hz, type="latex", file="output/hz_tables.tex")
 
 
-table_by_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & model== "Poisson Semilocal" & day %in% c(7)) %>%
-  group_by(location, day) %>% summarize(crps=mean(crps), dss=mean(dss), calibration=mean(calibration),
-                           centrality=mean(centrality), sharpness=mean(sharpness),
-                           bias=mean(bias)) %>% arrange(crps) %>% rename("horizon"=day)
+## table_by_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & model== "Poisson Semilocal" & day %in% c(7)) %>%
+##   group_by(location, day) %>% summarize(crps=mean(crps), dss=mean(dss), calibration=mean(calibration),
+##                            centrality=mean(centrality), sharpness=mean(sharpness),
+##                            bias=mean(bias)) %>% arrange(crps) %>% rename("horizon"=day)
 
-latex_table_by_hz <- xtable(table_by_hz,
-                      booktabs=T,
-                      latex.environment ="center",
-                      digits=2,
-                      label=as.character(glue::glue("tab:by_hz_evo")),
-                      caption=as.character(glue::glue("Model evaluations for the Poisson Semilocal model for each health zone"))
-                      )
+## latex_table_by_hz <- xtable(table_by_hz,
+##                       booktabs=T,
+##                       latex.environment ="center",
+##                       digits=2,
+##                       label=as.character(glue::glue("tab:by_hz_evo")),
+##                       caption=as.character(glue::glue("Model evaluations for the Poisson Semilocal model for each health zone"))
+##                       )
 
-print.xtable(latex_table_by_hz, type="latex", file="output/by_hz_tables.tex")
+## print.xtable(latex_table_by_hz, type="latex", file="output/by_hz_tables.tex")
 
 tot_data <- rbind(tot_data, data.table(health_zone="national", cases=sum(tot_data[, cases])))
 
@@ -135,7 +135,7 @@ latex_table_max_calibration <- xtable(largest,
 align(latex_table_max_calibration) <- "l|l|l|p{8cm}|l|"
 
 print.xtable(latex_table_max_calibration, type="latex", file="output/best_hz.tex",
-             include.rownames=FALSE)
+             include.rownames=FALSE, table.placement="h!")
 
 
                                         #Health zones
@@ -149,10 +149,16 @@ model_conf_nbin <- list(
   new_cases=new_cases_neg_binom,
   R_func=R_latest_value)
 
+model <- fit_model(model_data$national, model_conf$desc, model_conf$new_cases, model_conf$R_func)
 
+plot_r(model$R, model_data$national$dates[1])
+
+
+
+output=""
 for(hz in unique(overall_scores %>% pull(location))){
 
-  if(hs == "national_combined"){
+  if(hz == "national_combined"){
     next
   }
     
@@ -170,19 +176,63 @@ for(hz in unique(overall_scores %>% pull(location))){
     model_conf = model_conf_poisson
   }
   print(model_conf$desc)
+  plot_preds(model_conf,data , hz,results)
   
-  plot_preds(model_conf,data , hz,results)    
+  output = paste(output,
+                 glue::glue(
+'\\section{{ {hz} }}',
+'\\begin{{figure}}[H]',
+'\\begin{{subfigure}}{{\\textwidth}}',
+'  \\centering',
+'  \\includegraphics[width=0.9\\linewidth, height=7cm]{{../output/{hz}_predictions.png}}',
+'  \\caption{{Forecasted and predicted incidence for the semilocal poisson model}}',
+'\\end{{subfigure}}\n\n',
+'\\begin{{subfigure}}{{\\textwidth}}',
+'  \\centering',
+'  \\includegraphics[width=0.9\\linewidth, height=7cm]{{../output/{hz}_Rs.png}}',
+'  \\caption{{Forecasted and predicted repreoduction numbers for the semilocal poisson model}}',
+'\\end{{subfigure}}',
+'  \\caption{{Median forecast with 95 \\% prediction intervals and observed values for incidence and reproduction number for the semilocal poisson model for {hz}.}}',
+'\\end{{figure}}\n\n',
+"\\begin{{figure}}[H]
+\\begin{{subfigure}}{{0.5\\textwidth}}
+  \\centering
+  \\includegraphics[width=\\linewidth]{{../output/{hz}_crps.png}}  
+  \\caption{{Contineously Ranked Probability Score}}
+  \\label{{fig:sub-first}}
+\\end{{subfigure}}
+\\begin{{subfigure}}{{0.5\\textwidth}}
+  \\centering
+  \\includegraphics[width=\\linewidth]{{../output/{hz}_calibration.png}}  
+  \\caption{{Calibration p-value}}
+  \\label{{fig:sub-second}}
+\\end{{subfigure}}
 
+\\begin{{subfigure}}{{0.5\\textwidth}}
+  \\centering
+  \\includegraphics[width=\\linewidth]{{../output/{hz}_bias.png}}  
+  \\caption{{Bias}}
+  \\label{{fig:sub-third}}
+\\end{{subfigure}}
+\\begin{{subfigure}}{{0.5\\textwidth}}
+  \\centering
+  \\includegraphics[width=\\linewidth]{{../output/{hz}_centrality.png}}  
+  \\caption{{Centrality of PIT values}}
+  \\label{{fig:nat_scores_4}}
+\\end{{subfigure}}
+  \\caption{{Scores for the entire outbreak as a function of the forecasting horizon.}}
+
+  \\label{{fig:nat_scores}}
+\\end{{figure}}
+
+"))
 }
 
-
+file = "output/appendix_plots.tex"
+cat(output, file=file)
 # BEST model
 
 
-
-
-plot_preds(model_conf, model_data$health_zone$Beni, "Beni", results)
-plot_preds(model_conf, model_data$health_zone$Katwa, "Katwa", results)
 
 
 
@@ -190,12 +240,30 @@ nat <- results %>% filter(location == "national" & day==1 &
                             model=="poisson_bsts")
 predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
 mean_I <- rowQuantiles(predictions, probs=0.5)
+quantiles <- rowQuantiles(predictions, probs=c(0.05, 0.95))
+d = 1:length(mean_I)
+plot_data <- data.frame(median = mean_I, low=quantiles[,1], high=quantiles[,2],
+                  Model="National model", d=d)
+
 
 nat <- results %>% filter(location == "national_combined" & day==1 &
                             model=="poisson_bsts")
 predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
 mean_I_comb <- rowQuantiles(predictions, probs=0.5)
-d = 1:length(mean_I)
+quantiles_comb <- rowQuantiles(predictions, probs=c(0.05, 0.95))
+plot_data <- rbind(plot_data,
+                   data.frame(d=d,
+                              median = mean_I_comb, low=quantiles_comb[,1], high=quantiles_comb[,2],
+                              Model="Combined Health Zones"))
+
+
+
+
 length(mean_I)
-q <- ggplot() + geom_line(aes(x=1:length(mean_I_comb), y=mean_I_comb)) # geom_line(aes(x=d, y=mean_I))#
-ggsave("output/test.png", q)
+q <- ggplot(plot_data) + geom_line(aes(x=d, y=median, color=Model)) +
+  geom_ribbon(aes(x=d, ymin=low, ymax=high, fill=Model),alpha=0.4) + 
+  theme_bw() + xlab("Days") + ylab("Incidence") + scale_color_brewer("Models", palette = "Dark2") +
+  scale_fill_brewer("Models", palette = "Dark2")
+#  scale_fill_manual("Model", labels=c("red"="Sum of Health Zones", "blue"="National model"))
+ggsave("output/nat_combined.png", q, width=8, height=4)
+

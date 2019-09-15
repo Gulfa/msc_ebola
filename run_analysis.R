@@ -84,18 +84,18 @@ for (model_conf in models){
 
 #saveRDS(output, "results/latest.RDS")
 
-#output <- readRDS("results/latest.RDS")
+output <- readRDS("results/latest.RDS")
 
-## combined_national <- output %>%
-##   filter(location != "national") %>% group_by(model, dates, day, start_day) %>%
-##   summarize_at(vars(starts_with("V", ignore.case=FALSE)), sum) %>% ungroup() %>%
-##   mutate(location = "national_combined") %>%
-##   inner_join(output %>% filter(location == "national") %>% dplyr::select(model, dates, day, value),
-##              by=c("model"="model", "dates"="dates","day"="day")) 
+combined_national <- output %>%
+  filter(location != "national") %>% group_by(model, day, start_day) %>%
+  summarize_at(vars(starts_with("V", ignore.case=FALSE)), sum) %>% ungroup() %>%
+  mutate(location = "national_combined") %>%
+  inner_join(output %>% filter(location == "national") %>% dplyr::select(model, start_day, day, value),
+             by=c("model"="model", "start_day"="start_day","day"="day")) 
+ 
+output <- data.table::rbindlist(list(output %>% filter(location != "national_combined"), combined_national), fill=TRUE)
 
-## output <- rbind(output, combined_national, fill=TRUE)
-
-## saveRDS(output, "results/latest.RDS")
+saveRDS(output, "results/latest.RDS")
 
 output <- readRDS("results/latest.RDS")
 scores <- evaluate(output, cores=4)
