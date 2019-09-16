@@ -185,7 +185,7 @@ for(hz in unique(overall_scores %>% pull(location))){
 '\\begin{{subfigure}}{{\\textwidth}}',
 '  \\centering',
 '  \\includegraphics[width=0.9\\linewidth, height=7cm]{{../output/{hz}_predictions.png}}',
-'  \\caption{{Forecasted and predicted incidence for the semilocal poisson model}}',
+'  \\caption{{Forecasted and predicted incidence for the best fitting model}}',
 '\\end{{subfigure}}\n\n',
 '\\begin{{subfigure}}{{\\textwidth}}',
 '  \\centering',
@@ -220,7 +220,7 @@ for(hz in unique(overall_scores %>% pull(location))){
   \\caption{{Centrality of PIT values}}
   \\label{{fig:nat_scores_4}}
 \\end{{subfigure}}
-  \\caption{{Scores for the entire outbreak as a function of the forecasting horizon.}}
+  \\caption{{Scores for {hz} as a function of the forecasting horizon.}}
 
   \\label{{fig:nat_scores}}
 \\end{{figure}}
