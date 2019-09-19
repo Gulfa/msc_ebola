@@ -60,11 +60,11 @@ overall_scores <- ungroup(scores$overall) %>% mutate(model=recode(model,
 
 #q <- plot_r(results[["Basic model"]]$national$model$R, min(hz[, report_date]))
 
-#ggsave("output/nat_rep.png", q, width = 9, height=6)
+                                        #ggsave("output/nat_rep.png", q, width = 9, height=6)
 
 
 plot_scores(overall_scores %>% filter(location=="national"), location="national")
-plot_scores(overall_scores %>% filter(location=="national_combined"), location="national_cobmined")
+plot_scores(overall_scores %>% filter(location=="national_combined"), location="national_combined")
 
 
 table <- overall_scores %>% filter(location == "national" & day %in% c(1,7,14,21,28))%>%
@@ -254,7 +254,7 @@ nat <- results %>% filter(location == "national" & day==1 &
 predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
 mean_I <- rowQuantiles(predictions, probs=0.5)
 quantiles <- rowQuantiles(predictions, probs=c(0.05, 0.95))
-d = 1:length(mean_I)
+d = min(as.Date(model_data$national$dates)) + 1:length(mean_I)
 plot_data <- data.frame(median = mean_I, low=quantiles[,1], high=quantiles[,2],
                   Model="National model", d=d)
 

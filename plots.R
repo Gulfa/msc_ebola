@@ -159,7 +159,7 @@ plot_preds <- function(model_conf, data, x_location, results){
   max <- 70
   pred[upper >= max, upper:=max]
 
-  pred[, Date:=as.Date(data$dates[1]) + days]
+  pred[, Date:=min(as.Date(data$dates)) + days]
   
   q <- ggplot(pred) + geom_line(aes(x=Date, y=value, color="Observed")) +
     geom_line(aes(x=Date, y=pred, color="prediction")) + theme_bw() + 
@@ -175,7 +175,7 @@ plot_preds <- function(model_conf, data, x_location, results){
   
   max <- 15
   Rs[pred >= max, pred:=max]
-  Rs[, Date:=as.Date(data$dates[1]) + days]
+  Rs[, Date:=min(as.Date(data$dates)) + days]
   q <- ggplot(Rs) + geom_line(aes(x=Date, y=value, color="r")) +
     geom_line(aes(x=Date, y=pred, color="prediction")) + theme_bw() + ylab("Reproduction Number") +
     geom_ribbon(aes(x=Date, ymin=lower, ymax=upper, group=1, fill="unc"), alpha=0.4) +
