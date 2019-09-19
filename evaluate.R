@@ -116,7 +116,7 @@ bias_helper <- function(ecdf_function, value){
   
 
 
-bias <- function(value, predictions){
+bias <- function(values, predictions){
   return(mapply(
     bias_helper,
     apply(predictions, 1, ecdf),

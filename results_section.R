@@ -262,8 +262,8 @@ plot_data <- data.frame(median = mean_I, low=quantiles[,1], high=quantiles[,2],
 nat <- results %>% filter(location == "national_combined" & day==1 &
                             model=="poisson_bsts")
 predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
-mean_I_comb <- rowQuantiles(predictions, probs=0.5)/2
-quantiles_comb <- rowQuantiles(predictions, probs=c(0.05, 0.95))/2
+mean_I_comb <- rowQuantiles(predictions, probs=0.5)
+quantiles_comb <- rowQuantiles(predictions, probs=c(0.05, 0.95))
 plot_data <- rbind(plot_data,
                    data.frame(d=d,
                               median = mean_I_comb, low=quantiles_comb[,1], high=quantiles_comb[,2],
