@@ -16,7 +16,7 @@ hz <- data$health_zone
 q <- plot_weekly_incidence(data)
 
 ggsave("output/epi_curve.png", q, width = 9, height=7)
-
+setDT(hz)
 tot_data <- hz[, .(cases = max(confirmed_cases)), by=health_zone]
 
 q <- create_map(tot_data, "cases", "Total Cases")
@@ -69,17 +69,21 @@ plot_scores(overall_scores %>% filter(location=="national_combined"), location="
 
 table <- overall_scores %>% filter(location == "national" & day %in% c(1,7,14,21,28))%>%
   arrange(day) %>%
-  dplyr::select(-location) %>% rename("horizon"=day)
+  dplyr::select(-location) %>% rename("Horizon"=day, "Model"=model, "Sharpness"=sharpness,
+                                      "Bias"=bias, "CRPS"=crps, "DSS"=dss, "Centrality"=centrality,
+                                      "Calibration"=calibration)
 
 latex_table <- xtable(table,
                       booktabs=T,
                       latex.environment ="center",
                       digits=2,
                       label=as.character(glue::glue("tab:nat_evo")),
-                      caption=as.character(glue::glue("Model evaluations for predictions when all the models are fitted on the combined data from all the health zones."))
+                      caption=as.character(glue::glue("Model evaluations for predictions with different forecasting horizons for the national level."))
                       )
 
-print.xtable(latex_table, type="latex", file="output/nat_tables.tex",include.rownames=FALSE)
+
+print.xtable(latex_table, type="latex", file="output/nat_tables.tex",include.rownames=FALSE,
+             hline.after = c(0,4,8,12,16, 20))
 
 
 ## table_hz <- overall_scores %>% filter(!(location %in% c("national", "national_combined")) & day %in% c(1,7,14,21,28)) %>%
@@ -114,10 +118,17 @@ print.xtable(latex_table, type="latex", file="output/nat_tables.tex",include.row
 ## print.xtable(latex_table_by_hz, type="latex", file="output/by_hz_tables.tex")
 
 tot_data <- rbind(tot_data, data.table(health_zone="national", cases=sum(tot_data[, cases])))
+f <- function(x){
+  if(length(x) > 1){
+    return("All models")
+  }else{
+    return(x)
+  }
+}
 
 largest <- overall_scores %>%filter(calibration >=0.1) %>% group_by(location) %>%
-  filter(day==max(day)) %>% dplyr::select(location, model,day) %>%
-  group_by(location) %>% summarize(day=max(day), model=paste0(model, collapse=", "))%>%
+  filter(day==max(day))  %>% dplyr::select(location, model,day, crps) %>%
+  group_by(location) %>% filter(crps==min(crps)) %>% summarize(day=max(day), model=f(model))%>%
   right_join(tot_data, by=c("location"="health_zone"))  %>%
   arrange(-day) %>% mutate(day=replace_na(day, "NA"), model=replace_na(model, "No calibrated model")) %>%
   filter(location != "N/A") %>%
@@ -125,14 +136,16 @@ largest <- overall_scores %>%filter(calibration >=0.1) %>% group_by(location) %>
                 "Best model"=model, "Cases"= cases) 
 
 
+
+
 latex_table_max_calibration <- xtable(largest,
                                       booktabs=T,
                                       latex.environment ="center",
                                       digits=0,
                                       label=as.character(glue::glue("tab:best_model")),
-                                      caption="For each health zone we show the best maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. We also show which models could provide this calibrated forecast")
+                                      caption="For each health zone we show the maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. If multiple models are equally calibrated we chosse the one with smallest CRPS. For some health zones there were no calibrated forecasts")
 
-align(latex_table_max_calibration) <- "l|l|l|p{8cm}|l|"
+align(latex_table_max_calibration) <- "l|l|l|l|l|"
 
 print.xtable(latex_table_max_calibration, type="latex", file="output/best_hz.tex",
              include.rownames=FALSE, table.placement="h!")
@@ -199,26 +212,26 @@ for(hz in unique(overall_scores %>% pull(location))){
   \\centering
   \\includegraphics[width=\\linewidth]{{../output/{hz}_crps.png}}  
   \\caption{{Contineously Ranked Probability Score}}
-  \\label{{fig:sub-first}}
+  \\label{{{hz}_scores_1}}
 \\end{{subfigure}}
 \\begin{{subfigure}}{{0.5\\textwidth}}
   \\centering
   \\includegraphics[width=\\linewidth]{{../output/{hz}_calibration.png}}  
   \\caption{{Calibration p-value}}
-  \\label{{fig:sub-second}}
+  \\label{{{hz}_scores_2}}
 \\end{{subfigure}}
 
 \\begin{{subfigure}}{{0.5\\textwidth}}
   \\centering
   \\includegraphics[width=\\linewidth]{{../output/{hz}_bias.png}}  
   \\caption{{Bias}}
-  \\label{{fig:sub-third}}
+  \\label{{fig:{hz}_scores_3}}
 \\end{{subfigure}}
 \\begin{{subfigure}}{{0.5\\textwidth}}
   \\centering
   \\includegraphics[width=\\linewidth]{{../output/{hz}_centrality.png}}  
   \\caption{{Centrality of PIT values}}
-  \\label{{fig:nat_scores_4}}
+  \\label{{fig:{hz}_scores_4}}
 \\end{{subfigure}}
   \\caption{{Scores for {hz} as a function of the forecasting horizon.}}
 
@@ -249,8 +262,8 @@ plot_data <- data.frame(median = mean_I, low=quantiles[,1], high=quantiles[,2],
 nat <- results %>% filter(location == "national_combined" & day==1 &
                             model=="poisson_bsts")
 predictions <- as.matrix(nat %>% dplyr::select(starts_with("V", ignore.case = FALSE)))
-mean_I_comb <- rowQuantiles(predictions, probs=0.5)
-quantiles_comb <- rowQuantiles(predictions, probs=c(0.05, 0.95))
+mean_I_comb <- rowQuantiles(predictions, probs=0.5)/2
+quantiles_comb <- rowQuantiles(predictions, probs=c(0.05, 0.95))/2
 plot_data <- rbind(plot_data,
                    data.frame(d=d,
                               median = mean_I_comb, low=quantiles_comb[,1], high=quantiles_comb[,2],

@@ -87,7 +87,8 @@ for (model_conf in models){
 output <- readRDS("results/latest.RDS")
 
 combined_national <- output %>%
-  filter(location != "national") %>% group_by(model, day, start_day) %>%
+  filter(location != "national" & location != "national_combined") %>%
+  group_by(model, day, start_day) %>%
   summarize_at(vars(starts_with("V", ignore.case=FALSE)), sum) %>% ungroup() %>%
   mutate(location = "national_combined") %>%
   inner_join(output %>% filter(location == "national") %>% dplyr::select(model, start_day, day, value),

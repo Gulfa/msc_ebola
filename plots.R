@@ -107,7 +107,7 @@ plot_scores <- function(scores, location){
   for(col in c("calibration", "bias", "sharpness", "centrality", "crps", "dss")){
     
     
-    q <- ggplot(scores) + geom_line(aes(x=day, y=get(col), color=model)) +
+    q <- ggplot(scores) + geom_line(aes(x=day, y=get(col), color=model), size=1.3) +
       scale_color_brewer("Models", palette = "Dark2") + theme_bw() + ylab(labels[col]) + xlab("Forecasting Horizon") + theme(legend.position = "bottom", text = element_text(size=18), legend.text=element_text(size=12))
     ggsave(glue::glue("output/{location}_{col}.png"), width=8, height=4)
   }
@@ -165,7 +165,7 @@ plot_preds <- function(model_conf, data, x_location, results){
     geom_line(aes(x=Date, y=pred, color="prediction")) + theme_bw() + 
     geom_ribbon(aes(x=Date, ymin=lower, ymax=upper, group=1, fill="pred_unc"), alpha=0.4) +
     ylab("Incidence") +
-    scale_color_manual("", labels=c("Incidence", "Median prediction"),
+    scale_color_manual("", labels=c("Observed Incidence", "Median prediction"),
                        values=c("black", "#d95f02")) + 
     scale_fill_manual("", labels=c("95% prediction interval"),
                        values=c("#d95f02")) +
@@ -179,7 +179,7 @@ plot_preds <- function(model_conf, data, x_location, results){
   q <- ggplot(Rs) + geom_line(aes(x=Date, y=value, color="r")) +
     geom_line(aes(x=Date, y=pred, color="prediction")) + theme_bw() + ylab("Reproduction Number") +
     geom_ribbon(aes(x=Date, ymin=lower, ymax=upper, group=1, fill="unc"), alpha=0.4) +
-    scale_color_manual("", labels=c("r"="Observed", "prediction"="Median prediction"),
+    scale_color_manual("", labels=c("r"="Estimated reproduction number", "prediction"="Median prediction"),
                        values=c("r"="black", "prediction"="#d95f02")) + 
     scale_fill_manual("", labels=c("95% prediction interval"),
                       values=c("#d95f02")) +

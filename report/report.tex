@@ -35,17 +35,17 @@ Report: XXXX
   
   {\bf Methods:} Using publicly available daily incidence data we constructed a set of semi-mechansitic models based on a branching process with a time varying reproduction number. We include models with both Poisson and negative binomial offspring distributions. To forecast the reproduction number we first estimated the historic evolution of reproduction number and then either forecasted a constant reproduction number or used a forecast based on a baysian state space model with a semi-local trend. We compared the models using proper scoring rules and checked the calibration of the forecasts using Probability Integral Transformations. 
 
-  \medksip
+  \medskip
   
   {\bf Results:} On the national level we found that a negative binomial distribution was needed for calibrated one-day ahead forecasts, but that the model with a Poisson offspring distribution and a semi-local trend for the reproduction number was the best model for longer forcasts. This model could provide calibrated forecasts for 9 days. The semi-local trend models could also provide calibrated forecasts for some of the health zones, but for most of the health zones with a large number of cases the models did at best provide a few days of calibrated forecasts. At both the national and the sub-national level we found that the models with constant reprouction number would underestimate the uncetainty in the process and that semi-local trend models are likely to overestimate the uncertainty of the process. 
 
-  \medksip
+  \medskip
   
   {\bf Conclusions:}
 
   Flexible semi-mechanistic models based on a branching process can be used to give calibrated short-term forecasts of the Ebola outbreak in northern DRC on the national level and partly at sub-national level. Such forecasts can be useful to better understand the outbreak and to support the outbreak response. 
 
-  \medksip
+  \medskip
 
   {\bf Keywords:} Ebola, DRC, probabilistic forecasts, mathematical modelling, semi-mechanistic model, calibration, proper scoring rules.
 
@@ -62,7 +62,7 @@ Report: XXXX
 
 Real time modelling and forecasting of infectious diseases can play a crucial role during disease outbreaks like the ongoing Ebola outbreak in the north eastern Democratic Republic of Congo (DRC) \cite{heesterbeekModelingInfectiousDisease2015,riversUsingOutbreakScience2019a}. The use of models for ebola resone was pioneered durin the previous large Ebola outbreak in West Africa in 2014--2015 \cite{chretienMathematicalModelingWest}. The models, that were developed during and after the outbreak, were used both to increase our understanding of the outbreak and to predict the spread of the outbreak. Estimates were used in the official response planning \cite{whoebolaresponseteamEbolaVirusDisease2014} and to for example estimate needed bed capacity \cite{camachoTemporalChangesEbola2015}. Disease modelling has also been successfully implemented and used for many other response plans for many other infections diseases including Zika \cite{kobresSystematicReviewEvaluation2019} and influenza \cite{chretienInfluenzaForecastingHuman2014}. To effectively use results from mathematical modelling in an outbreak it is of key importance that modelling outputs are integrated into the outbreak response and decision making \cite{riversUsingOutbreakScience2019a}. This means that forecasts need to be available in real-time and be integrated into the outbreak surveillance information flow. In addition improved communication and embedding of modelling and modellers into the outbreak response is needed. 
 
-To provide useful information in an outbreak situation models should be probabelistic such that they assess and incorporate uncertainty into their predictions \cite{funkAssessingPerformanceRealtime2019, weiCalibrationTestsCount2014,gneitingEditorialProbabilisticForecasting2008}. Without understanding the range of possible outcomes from a model and their associated probabilities it is very difficult to support effective public health action in outbreak situations. Disease transmission process are inherently random systems so quantifying all the different types of uncertaintyis key. Once a model has been forumlated, it needs to be evaluated. Evaluations for probabilistic forecasts requires us to not just assess the accuracy of point predictions, but to assess if the model correctly assess it's own uncertainty\cite{gneitingProbabilisticForecastsCalibration2007, czadoPredictiveModelAssessment2009}. A model that that successfully assesses it's own uncertainty is said to be calibrated. We should strive to create well calibrated models that can be updated in real-time and that that are interpretable and can be used in the outbreak response. 
+To provide useful information in an outbreak situation models should be probabelistic such that they assess and incorporate uncertainty into their predictions \cite{funkAssessingPerformanceRealtime2019, weiCalibrationTestsCount2014,gneitingEditorialProbabilisticForecasting2008}. Without understanding the range of possible outcomes from a model and their associated probabilities it is very difficult to support effective public health action in outbreak situations. Disease transmission process are inherently random systems so quantifying all the different types of uncertaintyis key. Once a model has been forumlated, it needs to be evaluated. Evaluations for probabilistic forecasts requires us to not just assess the accuracy of point predictions, but to assess if the model correctly assess it's own uncertainty \cite{gneitingProbabilisticForecastsCalibration2007, czadoPredictiveModelAssessment2009}. A model that that successfully assesses it's own uncertainty is said to be calibrated. We should strive to create well calibrated models that can be updated in real-time and that that are interpretable and can be used in the outbreak response. 
 
 In this thesis, we will describe a framework for flexibly producing probabilistic forecasts and assess how well the resulting models can be used in the ongoing Ebola outbreak in north-eastern DRC. We will compare different models to choose the best model and to explore the epidemiology of the current outbreak. 
 
@@ -201,7 +201,7 @@ We will assess how well the models work both for the entire epidemic and for eac
 
 \section{Results}
 
-From the start of the 2018--2019 DRC Ebola outbreak until the 31st of August 2019 there has been 2,926 confirmed Ebola cases and 1926 confirmed Ebola deaths. This gives a high Case Fatality Ratio of 66\%. Figure \ref{fig:epi_curve} shows the weekly number of cases and the map in Figure \ref{fig:tot_map} the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimate of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period with varrying weekly case numbers, there was an increase in cases from October 2018 with a large reproduction number, followed by a more varied period where the reproduction number varied around 1 with some waves of larger reproduction number. From March 2019 the number of cases per week increased significantly, with a continuing large number of cases in June and July even if the reproduction number decreased. From July 2019 the reproduction has varied around one, indicating that the outbreak is still not under control, but that the intensity of the outbreak is less than in May and June. From the epi-curve there seems to be some connection between large increases in incidence and introduction or reintroduction into specific health zones. We can also see that the disease is moving around between health zones where at different time the incidences is dominated by different health zones. 
+A total of 2,926 confirmed Ebola cases and 1926 confirmed Ebola deaths have been reported in the ongoing outbreak in DRC as of the 31st of August, giving a case fatality ratio of 66\%. Figure \ref{fig:epi_curve} shows the weekly number of confirmed cases and the map in Figure \ref{fig:tot_map} shows the total number of cases from each Health Zone. From Figure \ref{fig:epi_curve} and the estimate of the instantaneous reproduction number in Figure \ref{fig:rep_num} we can see the evolution of the outbreak. After the initial period with varrying weekly case numbers, there was an increase in cases from October 2018 with a large reproduction number, followed by a more varied period where the reproduction number varied around 1 with some waves of larger transmission. From March 2019 the number of cases per week increased significantly. The larger number of weekly cases continued in June and July even as the reproduction number decreased. From July 2019 the reproduction has varied around one, indicating that the outbreak is still not under control, but that the intensity of the outbreak is less than in May and June. There are large regional differences with Beni and Katwat health zones being hardet hit. From the epi-curve there seems to be some connection between large increases in incidence and introduction or reintroduction into specific health zones. We can also see that the disease is moving around between health zones since the total incidence is dominated by different health zones at different times in the outbreak. 
 
 \begin{figure}[h!]
 \begin{subfigure}{0.48\textwidth}
@@ -209,13 +209,13 @@ From the start of the 2018--2019 DRC Ebola outbreak until the 31st of August 201
 
   % include first image
   \includegraphics[width=\textwidth]{../output/epi_curve.png}
-  \caption{Number of new confirmed cases by week in the health zones with the most Ebola Cases}
+  \caption{Number of new confirmed ebola cases by week and by health zone.}
   \label{fig:epi_curve}
 \end{subfigure}
 \begin{subfigure}{0.48\textwidth}
   \centering
   \includegraphics[width=\textwidth]{../output/tot_map.png}
-  \caption{Total number of confirmed cases by Health Zone}
+  \caption{Total number of confirmed cases by health zone}
   \label{fig:tot_map}
 \end{subfigure}
 
@@ -224,15 +224,17 @@ From the start of the 2018--2019 DRC Ebola outbreak until the 31st of August 201
 \begin{subfigure}{\textwidth}
   \centering
   \includegraphics[width=\textwidth]{../output/nat_Rs.png}
-  \caption{Reproduction number as a function of time, the shaded region shows the 95\% credible interval}
+  \caption{Mean estimated reproduction number as a function of time. The shaded region shows the 95\% credible interval.}
   \label{fig:rep_num}
 \end{subfigure}
+\caption{The three figures show the number of cases and the reproduction number as a function of time and health-zone.}
+\label{fig:nat_outbreak}
 \end{figure}
 
 \subsection{National level forecasts}
 The first step in modelling the outbreak on the national level was to find the best fitting value of the dispersion parameter for the negative binomial models. We found that the dispersion parameter that gives the smallest CRPS score for one day ahead predictions for the negative binomial models was $k\approx8$, but a fairly large range of parameters gave a reasonable fit. We therefore chose to use $k=8$ for the negative binomial distributions both for the national and health zone forecasts.
 
-All four models were successfully fitted on incidence data from 395 days and then used to provide short term forecasts. The calibration and proper scoring rules scores for the four models for different forecasting horizons can be seen in Table \ref{tab:nat_evo} for weekly Forecasting horizons up to four weeks. We also show the the evolution of calibration, bias, CRPS and the centrality of PIT values as a function of the forecasting horizon in Figure \ref{fig:nat_scores}
+All four of models were successfully fitted on incidence data from 395 days of national data and then used to provide short term forecasts. The calibration and proper scoring rules scores for the four models for different forecasting horizons can be seen in Table \ref{tab:nat_evo} for weekly forecasting horizons up to four weeks. We also show the the evolution of calibration, bias, CRPS and the centrality of PIT values as a function of the forecasting horizon in Figure \ref{fig:nat_scores}
 \input{../output/nat_tables}
 
 
@@ -266,16 +268,17 @@ All four models were successfully fitted on incidence data from 395 days and the
   \caption{Centrality of PIT values}
   \label{fig:nat_scores_4}
 \end{subfigure}
-  \caption{Evaluation of the four models as a function of forecasting horizon for the whole outbreak}
+  \caption{Evaluation of the four models as a function of forecasting horizon at the national level.}
 
   \label{fig:nat_scores}
 \end{figure}
 
-Together they show that for next day forecast, the negative binomial offspring distribution is needed for a calibrated forecast as only the two negative binomial models are calibrated with a p-value larger than 0.1. We can also see that there are no big differences for one-day ahead forecasts based on the method of forecasting the reproduction number. For longer forecasting horizons the Poisson distribution with the semi-local time series prediction for $R_t$ is the best model and is calibrated up until 9 days. This is the only model that is calibrated for longer forecasting horizons and it also has the lowest CRPS and DSS scores. The centrality of the PIT scores in Figure \ref{fig:nat_scores_4} give us extra information about how our models fail. A negative centrality means that the model has too little uncertainty and we can see that this is the case for the two models based on using the latest reproduction number. The two models using the semi-local trend for the reproduction number are closer to zero centrality, but they have too much uncertainty since their centrality score is above zero. For the same method of forecasting the reproduction number, the negative binomial models always have larger uncertainty as we can also see from the sharpness figures. And as after about one week the sharpness of the poisson semilocal model has grown to be the same as the negative binomial latest model. We can see how the semilocal models quickly become less sharp, while the sharpness for the constant models does change that much with forecasting horizon. This is why the poisson model is preferd at larger forecasting horizons. We can also see that the two semi-local models have a small negative bias indiacting that on average they underestimate the incidence somewhat.
+Together they show that for next day forecast, the negative binomial offspring distribution is needed for a calibrated forecast as only the two negative binomial models are calibrated with a p-value larger than 0.1. We can also see that there are no big differences for one-day ahead forecasts based on the method of forecasting the reproduction number. For longer forecasting horizons the Poisson distribution with the semi-local time series prediction for $R_t$ is the best model and is calibrated up until a maximum of nine days even if it is not well calibrated for all the days before. At very short forecasting horizons it is uncalibrated as it is underestimating it's own uncertainty. This is the only model that is calibrated for longer forecasting horizons and it also has the lowest CRPS and DSS scores. The centrality of the PIT scores in Figure \ref{fig:nat_scores_4} give us extra information about why the models become uncalibrated. A negative centrality means that the model has too little uncertainty and we can see that this is the case for the two models based on using the latest reproduction number. The two models using the semi-local trend for the reproduction number are closer to zero centrality, but they have too much uncertainty since their centrality score is above zero. For the same method of forecasting the reproduction number, the negative binomial models always have larger uncertainty as we can also see from the sharpness figures. This is why the poisson model is preferd at larger forecasting horizons. After about one week the sharpness of the poisson semi-local model has grown to be the same as the negative binomial latest model. We can see how the semi-local models quickly become less sharp, while the sharpness for the constant models does change as much with forecasting horizon.  We can also see that the two semi-local models have a small negative bias indiacting that on average they underestimate the incidence.
 
-In Figure \ref{fig:nat_pred} we show 28 day forecasts every 50 days for the semi-local Poisson model and the corresponding forecasts for the reproduction number. We can also here see that in the short term the model works quite well, but that the amount of uncertainty often seems a bit to large for the reproduction number forecasts. 
+In Figure \ref{fig:nat_pred} we show 28 day forecasts every 50 days for the semi-local Poisson model and the corresponding forecasts for the reproduction number. These results show the same pattern as the more formal evaluations. In the short term the model works quite well, but that the amount of uncertainty often seems a bit too large for the reproduction number forecasts. 
 
-When we use the model to provide forcasts for the future where wehave no data wecan see that the model predict a decreasing median reproduction number and a fairly steady incidence through the month of September. We exepct between 10-15 cases per day over the next month. If the current trend continues without any new wave of higher reproduction number there is hope that the outbreak can be brought into control if the reproduction keeps decreasing. 
+We also forecast the incidence for the 28 days following the the 1st of Sepemteber 2019 in 
+Figure \ref{fig:nat_pred}. Here the model predict a sligthly decreasing median reproduction number and a fairly steady incidence through the month of September. We exepct between 10--15 cases per day over the next month. If the current trend continues without any new wave of higher reproduction number there is hope that the outbreak can be brought into control if the reproduction keeps decreasing. 
 
 \begin{figure}[h!]
 \begin{subfigure}{\textwidth}
@@ -300,13 +303,14 @@ When we use the model to provide forcasts for the future where wehave no data we
 
 \subsection{Sub-national forecasts}
 
-We fitted all four models separately for each health zone with more than one case of Ebola. The performance of the models varied significantly from health-zone to health-zone. Table \ref{tab:best_model} shows the best model(s) for each health zone, how large a forecasting horizon we can have without ruling out calibration and the total number of confirmed cases in the health-zone. There is a large difference from health-zones where the forecasts are calibrated for 28 days, to health-zones where not even the one day ahead predictions are calibrated.
+We fitted all four models separately for each health zone that had more than one case of Ebola. The performance of the models varied significantly from health zone to health zone. Table \ref{tab:best_model} shows the best model(s) for each health zone, how large a forecasting horizon we can have without ruling out calibration and the total number of confirmed cases in the health zone. There is a large difference from health zones where the forecasts are calibrated for 28 days, to health zones where not even the one day ahead predictions are calibrated. Even if the model is calibrated at 28 days, it does not mean that it is calibrated for all forecasting horizons less than 28 days. 
+
 
 \input{../output/best_hz}
 
 For all health zones apart from one, we find that the best model is a model with a semi-local trend in the reproduction number. Sometimes the Poisson models are better and sometimes the negative binomial models are better.
 
-The health zones were we get very well calibrated models are health zones with small bursts of Ebola activity followed by long periods of no cases. Once our model has seen no new infections in a few weeks they will predict almost 0 new cases irrespective of the current reproduction number. This behaviour works well when there are no new imported cases as we can see in some of the health zones. For the larger health zones where there is more sustained transmission the models works for some health zones, but not as well on the national level. There are also some health zones with many cases where the models do not work well. We show the predictions and the centrality measures for the Beni and Katwa health zones in Figure \ref{fig:beni_katwa}. The models and evaluations for all the other health zones can bee seen in the Appendix. For both Beni and Katwa the main reason the models are not well calibrated is that they overestimated their own uncertainty. This is especially the case in Katwa and explains why even the one-day ahead prediction is not well calibrated. 
+The health zones were we get very well calibrated models at 28 days are health zones with small bursts of Ebola activity followed by long periods of no cases. Once our model has seen no new infections in a few weeks they will predict close to zero new cases with essentially 0 sharpness irrespective of the current reproduction number. This behaviour works well when there are no new imported cases as we can see in some of the health zones. For the larger health zones where there is more sustained transmission the models works for some health zones, but not as well on the national level. There are also some health zones with many cases where the models do not work well. We show the predictions and the centrality measures for the Beni and Katwa health zones in Figure \ref{fig:beni_katwa}. The models and evaluations for all the other health zones can bee seen in the Appendix. For both Beni and Katwa the main reason the models are not well calibrated is that they overestimated their own uncertainty. This is especially the case in Katwa and explains why even the one-day ahead prediction is not well calibrated. 
 
 \begin{figure}[h!]
 \begin{subfigure}{0.5\textwidth}

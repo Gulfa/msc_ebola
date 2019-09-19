@@ -1,31 +1,29 @@
 % latex table generated in R 3.6.1 by xtable 1.8-4 package
-% Sun Sep 15 15:19:38 2019
+% Thu Sep 19 17:47:55 2019
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l|l|p{8cm}|l|}
+\begin{tabular}{|l|l|l|l|}
   \hline
 Location & Largest Horizon & Best model & Cases \\ 
   \hline
-Kayna & 28 & NegBin Semilocal, Poisson Semilocal & 22 \\ 
-  Nyiragongo & 28 & NegBin Semilocal, Poisson Semilocal & 3 \\ 
-  Tchomia & 28 & NegBin Semilocal, Poisson Semilocal & 2 \\ 
-  Lolwa & 26 & NegBin Semilocal, NegBin Latest, Poisson Semilocal, Poisson Latest & 3 \\ 
+Kayna & 28 & NegBin Semilocal & 22 \\ 
+  Nyiragongo & 28 & NegBin Semilocal & 3 \\ 
+  Tchomia & 28 & NegBin Semilocal & 2 \\ 
+  Lolwa & 26 & All models & 3 \\ 
   Bunia & 20 & NegBin Semilocal & 4 \\ 
-  Mwenga & 18 & NegBin Semilocal, NegBin Latest, Poisson Semilocal, Poisson Latest & 6 \\ 
+  Mwenga & 18 & All models & 6 \\ 
   Alimbongo & 13 & Poisson Semilocal & 5 \\ 
   Kayina & 9 & Poisson Semilocal & 10 \\ 
   national & 9 & Poisson Semilocal & 2942 \\ 
-  national & 9 & Poisson Semilocal & 5884 \\ 
-  national & 9 & Poisson Semilocal & 11768 \\ 
   Mutwanga & 7 & Poisson Semilocal & 31 \\ 
   Rwampara & 6 & NegBin Latest & 8 \\ 
   Lubero & 4 & NegBin Semilocal & 31 \\ 
   Musienene & 4 & Poisson Semilocal & 84 \\ 
   Butembo & 3 & NegBin Semilocal & 279 \\ 
-  Kyondo & 3 & NegBin Semilocal, Poisson Latest & 22 \\ 
+  Kyondo & 3 & NegBin Semilocal & 22 \\ 
   Mabalako & 3 & NegBin Semilocal & 371 \\ 
   Beni & 2 & NegBin Semilocal & 661 \\ 
-  Vuhovi & 2 & NegBin Semilocal, Poisson Semilocal & 103 \\ 
+  Vuhovi & 2 & NegBin Semilocal & 103 \\ 
   Biena & NA & No calibrated model & 16 \\ 
   Goma & NA & No calibrated model & 1 \\ 
   Kalunguta & NA & No calibrated model & 164 \\ 
@@ -42,6 +40,6 @@ Kayna & 28 & NegBin Semilocal, Poisson Semilocal & 22 \\
   Rwampara (Bunia) & NA & No calibrated model & 1 \\ 
    \hline
 \end{tabular}
-\caption{For each health zone we show the best maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. We also show which models could provide this calibrated forecast} 
+\caption{For each health zone we show the maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. If multiple models are equally calibrated we chosse the one with smallest CRPS. For some health zones there were no calibrated forecasts} 
 \label{tab:best_model}
 \end{table}
