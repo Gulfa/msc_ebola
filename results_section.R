@@ -131,7 +131,7 @@ largest <- overall_scores %>%filter(calibration >=0.1) %>% group_by(location) %>
   group_by(location) %>% filter(crps==min(crps)) %>% summarize(day=max(day), model=f(model))%>%
   right_join(tot_data, by=c("location"="health_zone"))  %>%
   arrange(-day) %>% mutate(day=replace_na(day, "NA"), model=replace_na(model, "No calibrated model")) %>%
-  filter(location != "N/A") %>%
+  filter(location != "N/A" & cases > 1) %>%
   dplyr::select(Location=location, "Largest Horizon"=day,
                 "Best model"=model, "Cases"= cases) 
 
