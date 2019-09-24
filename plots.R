@@ -101,7 +101,7 @@ plot_scores <- function(scores, location){
     "bias" = "Bias",
     "sharpness" = "Sharpness",
     "centrality" = "Centrality",
-    "crps"= "CRPS",
+    "crps"= "RPS",
     "dss" = "DSS"
     )
   for(col in c("calibration", "bias", "sharpness", "centrality", "crps", "dss")){

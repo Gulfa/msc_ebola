@@ -69,8 +69,8 @@ plot_scores(overall_scores %>% filter(location=="national_combined"), location="
 
 table <- overall_scores %>% filter(location == "national" & day %in% c(1,7,14,21,28))%>%
   arrange(day) %>%
-  dplyr::select(-location) %>% rename("Horizon"=day, "Model"=model, "Sharpness"=sharpness,
-                                      "Bias"=bias, "CRPS"=crps, "DSS"=dss, "Centrality"=centrality,
+  dplyr::select(-location) %>% rename("Horizon (days)"=day, "Model"=model, "Sharpness"=sharpness,
+                                      "Bias"=bias, "RPS"=crps, "DSS"=dss, "Centrality"=centrality,
                                       "Calibration"=calibration)
 
 latex_table <- xtable(table,
@@ -143,7 +143,7 @@ latex_table_max_calibration <- xtable(largest,
                                       latex.environment ="center",
                                       digits=0,
                                       label=as.character(glue::glue("tab:best_model")),
-                                      caption="For each health zone we show the maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. If multiple models are equally calibrated we chosse the one with smallest CRPS. For some health zones there were no calibrated forecasts")
+                                      caption="For each health zone we show the maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. If multiple models are equally calibrated we chosse the one with smallest RPS. For some health zones there were no calibrated forecasts")
 
 align(latex_table_max_calibration) <- "l|l|l|l|l|"
 
@@ -161,12 +161,6 @@ model_conf_nbin <- list(
   desc="nbin_latest",
   new_cases=new_cases_neg_binom,
   R_func=R_latest_value)
-
-model <- fit_model(model_data$national, model_conf$desc, model_conf$new_cases, model_conf$R_func)
-
-plot_r(model$R, model_data$national$dates[1])
-
-
 
 output=""
 for(hz in unique(overall_scores %>% pull(location))){

@@ -12,7 +12,7 @@ prob <- function(dist, value){
 }
 
 
-PIT <- function(data, N=10){
+PIT <- function(data, N=30){
   p_values <- c()
   centralities <- c()
   predictions <- as.matrix(data %>% dplyr::select(starts_with("V", ignore.case=FALSE)))
@@ -72,6 +72,14 @@ evaluate <- function(data, cores=1){
     
 
   }
+  evaluate_PIT_combined_hz_day <- function(x_day){
+    return(data %>% filter(!is.na(value) & day==x_day & location != "national" &
+                           location != "national_combined") %>%
+      group_by(model, day) %>% 
+      do( bow(., tie(centrality, calibration) := PIT(.))))
+    
+
+  }
   
   
   d <- data %>% filter(!is.na(value))
@@ -84,13 +92,26 @@ evaluate <- function(data, cores=1){
   print("Starting PIT")
   PIT_results <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=cores))
   
+  PIT_results_combined_hz <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=cores))
+
+  PIT_results_combined_hz[, location="hz_combined"]
+
+  PIT_results <- rbindlist(list(PIT_results, PIT_results_combined_hz))
+  
   total <- by_start_day %>% group_by(model, location, day) %>%
     summarize(sharpness=mean(sharpness),
               bias=mean(bias),
               crps=mean(crps),
               dss=mean(dss, na.rm=T))
   
-  
+  total_hz_combined <- total %>% filter(location != "national" & location != "national_combined") %>%
+    group_by(model, day) %>% summarize(sharpness=mean(sharpness),
+                                       bias=mean(bias),
+                                       crps=mean(crps),
+                                       dss=mean(dss, na.rm=T)) %>%
+    mutate(location ="hz_combined")
+
+  total <- rbindlist(list(total, total_combined_hz))
   
   overall_results <- inner_join(total, PIT_results, by=c("model", "location", "day"))
 
