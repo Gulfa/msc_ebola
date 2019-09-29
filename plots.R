@@ -94,7 +94,7 @@ plot_prediction <- function(inc, prediction){
 
 
 
-plot_scores <- function(scores, location){
+plot_scores <- function(scores, location, log=c()){
 
   labels <- list(
     "calibration" = "Calibration",
@@ -108,8 +108,11 @@ plot_scores <- function(scores, location){
     
     
     q <- ggplot(scores) + geom_line(aes(x=day, y=get(col), color=model), size=1.3) +
-      scale_color_brewer("Models", palette = "Dark2") + theme_bw() + ylab(labels[col]) + xlab("Forecasting Horizon") + theme(legend.position = "bottom", text = element_text(size=18), legend.text=element_text(size=12))
-    ggsave(glue::glue("output/{location}_{col}.png"), width=8, height=4)
+      scale_color_brewer("Models", palette = "Dark2") + theme_bw() + ylab(labels[col]) + xlab("Forecasting Horizon (days)") + theme(legend.position = "bottom", text = element_text(size=18), legend.text=element_text(size=12))
+    if(col %in% log){
+      q <- q + scale_y_log10()
+    }
+    ggsave(glue::glue("output/{location}_{col}.png"), q, width=8, height=4)
   }
 }
 

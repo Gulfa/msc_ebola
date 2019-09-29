@@ -64,24 +64,26 @@ daily_score <- function(data){
 
 
 evaluate <- function(data, cores=1){
+  
   setDT(data)
-  evaluate_PIT_day <- function(x_day){
+ evaluate_PIT_day <- function(x_day){
     return(data %>% filter(!is.na(value), day==x_day) %>%
-      group_by(model, day, location) %>% 
+      group_by(model, day, location) %>%
       do( bow(., tie(centrality, calibration) := PIT(.))))
-    
+
 
   }
+
   evaluate_PIT_combined_hz_day <- function(x_day){
     return(data %>% filter(!is.na(value) & day==x_day & location != "national" &
                            location != "national_combined") %>%
-      group_by(model, day) %>% 
+      group_by(model, day) %>%
       do( bow(., tie(centrality, calibration) := PIT(.))))
-    
+
 
   }
-  
-  
+
+
   d <- data %>% filter(!is.na(value))
   scores <- daily_score(d)
   by_start_day <- d %>% mutate(sharpness=scores[[1]],
@@ -91,28 +93,28 @@ evaluate <- function(data, cores=1){
                     )
   print("Starting PIT")
   PIT_results <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=cores))
-  
-  PIT_results_combined_hz <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_day, mc.cores=cores))
 
-  PIT_results_combined_hz[, location="hz_combined"]
+  PIT_results_combined_hz <- rbindlist(parallel::mclapply(unique(data[, day]), evaluate_PIT_combined_hz_day, mc.cores=cores))
 
-  PIT_results <- rbindlist(list(PIT_results, PIT_results_combined_hz))
-  
+  PIT_results_combined_hz[, location:="hz_combined"]
+
+  PIT_results <- rbindlist(list(PIT_results, PIT_results_combined_hz), use.names=TRUE)
+
   total <- by_start_day %>% group_by(model, location, day) %>%
     summarize(sharpness=mean(sharpness),
               bias=mean(bias),
               crps=mean(crps),
               dss=mean(dss, na.rm=T))
-  
-  total_hz_combined <- total %>% filter(location != "national" & location != "national_combined") %>%
+
+  total_combined_hz <- total %>% filter(location != "national" & location != "national_combined") %>%
     group_by(model, day) %>% summarize(sharpness=mean(sharpness),
                                        bias=mean(bias),
                                        crps=mean(crps),
                                        dss=mean(dss, na.rm=T)) %>%
-    mutate(location ="hz_combined")
+                                           mutate(location ="hz_combined")
 
-  total <- rbindlist(list(total, total_combined_hz))
-  
+  total <- rbindlist(list(total, total_combined_hz), use.names=TRUE)
+
   overall_results <- inner_join(total, PIT_results, by=c("model", "location", "day"))
 
   return(list("by_day"= by_start_day, "overall"= overall_results))

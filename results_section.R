@@ -51,8 +51,14 @@ ggsave("output/prob_dist.png", q, width=7, height=4)
 results <- readRDS("results/latest.RDS")
 
 scores <- readRDS("results/scores.RDS")
+scores_comb <- readRDS("results/scores_combined.RDS")
 
 overall_scores <- ungroup(scores$overall) %>% mutate(model=recode(model,
+                                                "poisson_bsts"="Poisson Semilocal",
+                                                "nbin_bsts"="NegBin Semilocal",
+                                                "poisson_latest"="Poisson Latest",
+                                                "nbin_latest"="NegBin Latest"))
+overall_scores_c <- ungroup(scores_comb$overall) %>% mutate(model=recode(model,
                                                 "poisson_bsts"="Poisson Semilocal",
                                                 "nbin_bsts"="NegBin Semilocal",
                                                 "poisson_latest"="Poisson Latest",
@@ -65,6 +71,7 @@ overall_scores <- ungroup(scores$overall) %>% mutate(model=recode(model,
 
 plot_scores(overall_scores %>% filter(location=="national"), location="national")
 plot_scores(overall_scores %>% filter(location=="national_combined"), location="national_combined")
+plot_scores(overall_scores_c %>% filter(location=="hz_combined"), location="hz_combined", log=c("crps", "sharpness"))
 
 
 table <- overall_scores %>% filter(location == "national" & day %in% c(1,7,14,21,28))%>%
@@ -81,7 +88,7 @@ latex_table <- xtable(table,
                       caption=as.character(glue::glue("Model evaluations for predictions with different forecasting horizons for the national level."))
                       )
 
-
+align(latex_table) <- "ll|p{2cm}|l|l|l|l|l|l"
 print.xtable(latex_table, type="latex", file="output/nat_tables.tex",include.rownames=FALSE,
              hline.after = c(0,4,8,12,16, 20))
 
@@ -143,7 +150,7 @@ latex_table_max_calibration <- xtable(largest,
                                       latex.environment ="center",
                                       digits=0,
                                       label=as.character(glue::glue("tab:best_model")),
-                                      caption="For each health zone we show the maximal forecasting horizon where we can not exclude calibration at the p=0.1 level. If multiple models are equally calibrated we chosse the one with smallest RPS. For some health zones there were no calibrated forecasts")
+                                      caption="For each health zone we show the maximal forecasting horizon where we cannot exclude calibration at the p=0.1 level. If multiple models are equally calibrated, we choose the one with smallest RPS. For some health zones there were no calibrated forecasts.")
 
 align(latex_table_max_calibration) <- "l|l|l|l|l|"
 
@@ -184,7 +191,7 @@ for(hz in unique(overall_scores %>% pull(location))){
   }
   print(model_conf$desc)
   plot_preds(model_conf,data , hz,results)
-  
+  if( hz %in% c("Tchomia", "Mabalako", "Butembo")){
   output = paste(output,
                  glue::glue(
 '\\section{{ {hz} }}',
@@ -233,6 +240,7 @@ for(hz in unique(overall_scores %>% pull(location))){
 \\end{{figure}}
 
 "))
+  }
 }
 
 file = "output/appendix_plots.tex"
