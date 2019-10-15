@@ -176,7 +176,7 @@ for(hz in unique(overall_scores %>% pull(location))){
     next
   }
     
-  plot_scores(overall_scores %>% filter(location == hz), hz)
+#  plot_scores(overall_scores %>% filter(location == hz), hz)
   print(hz)
   if(hz %in% c("national")){
     data = model_data$national
@@ -190,7 +190,7 @@ for(hz in unique(overall_scores %>% pull(location))){
     model_conf = model_conf_poisson
   }
   print(model_conf$desc)
-  plot_preds(model_conf,data , hz,results)
+ # plot_preds(model_conf,data , hz,results)
   if( hz %in% c("Tchomia", "Mabalako", "Butembo")){
   output = paste(output,
                  glue::glue(
@@ -204,9 +204,9 @@ for(hz in unique(overall_scores %>% pull(location))){
 '\\begin{{subfigure}}{{\\textwidth}}',
 '  \\centering',
 '  \\includegraphics[width=0.9\\linewidth, height=7cm]{{../output/{hz}_Rs.png}}',
-'  \\caption{{Forecasted and predicted repreoduction numbers for the semilocal poisson model}}',
+'  \\caption{{Forecasted and predicted repreoduction numbers for the best fitting model}}',
 '\\end{{subfigure}}',
-'  \\caption{{Median forecast with 95 \\% prediction intervals and observed values for incidence and reproduction number for the semilocal poisson model for {hz}.}}',
+'  \\caption{{Median forecast with 95 \\% prediction intervals and observed values for incidence and reproduction number for the best fitting model for {hz}.}}',
 '\\end{{figure}}\n\n',
 "\\begin{{figure}}[H]
 \\begin{{subfigure}}{{0.5\\textwidth}}
